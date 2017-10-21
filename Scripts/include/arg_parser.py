@@ -22,13 +22,6 @@ def arg_parser(argv, program_argv, logging):
 
     program_argv['credit_based_FC'] = True
     program_argv['network_dime'] = 4
-    program_argv['add_parity'] = False
-    program_argv['add_checkers'] = False
-    program_argv['NI_Test'] = False
-    program_argv['add_FI'] = False
-    program_argv['add_FC'] = False
-    program_argv['packet_drop'] = False
-    program_argv['packet_saving'] = False
     program_argv['lat'] = False
     program_argv['debug'] = False
     program_argv['trace'] = False
@@ -40,40 +33,8 @@ def arg_parser(argv, program_argv, logging):
         if program_argv['network_dime'] % 2 != 0:
             raise ValueError("Wrong network size. Please choose multiples of 2. For example 4!")
 
-    if '-P' in argv[1:]:
-        program_argv['add_parity'] = True
-
-    if '-checkers' in argv[1:]:
-        program_argv['add_checkers'] = True
-
-    if '-NI_Test' in argv[1:]:
-        program_argv['NI_Test'] = True
-
-    if '-NI' in argv[1:]:
-        if argv[argv.index('-NI')+1].isdigit():
-            program_argv['add_NI'] = int(argv[argv.index('-NI')+1])
-        else:
-            program_argv['add_NI'] = True
-        if program_argv['add_NI'] < 0:
-            raise ValueError("Network interface's depth cannot be negative!")
-
-    if '-FI' in argv[1:]:
-        program_argv['add_FI'] = True
-
-    if '-FC' in argv[1:]:
-        program_argv['add_FC'] = True
-
-    if '-packet_drop' in argv[1:]:
-        program_argv['packet_drop'] = True
-
-    if '-packet_saving' in argv[1:]:
-        program_argv['packet_saving'] = True
-
     if '-lat' in argv[1:]:
         program_argv['lat'] = True
-
-    if '-SHMU' in argv[1:]:
-        program_argv['add_SHMU'] = True
 
     if '-Rand'	in argv[1:]:
         program_argv['rand'] = float(argv[argv.index('-Rand')+1])
@@ -107,9 +68,6 @@ def arg_parser(argv, program_argv, logging):
 
     if '--trace' in argv[1:]:
         program_argv['trace'] = True
-
-    if '-verilog' in argv[1:]:
-        program_argv['verilog'] = True
 
     if '-c' in argv[1:]:
         program_argv['command-line'] = True

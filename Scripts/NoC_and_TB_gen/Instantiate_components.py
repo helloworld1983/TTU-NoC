@@ -3,14 +3,12 @@ from CB_functions import rxy_rst_calculator, cx_rst_calculator
 import math
 
 
-
 def instantiate_routers(noc_file, network_dime):
     """
     Instantiates the different routers based on the specified configuration!
     noc_file:      string   : destination file
     network_dime:  integer  : network size
     """
-
     
     noc_file.write("-- instantiating the routers\n")
     for i in range(0, network_dime**2):

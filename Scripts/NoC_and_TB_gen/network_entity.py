@@ -14,12 +14,12 @@ def generate_entity(noc_file, network_dime):
     noc_file.write("port (reset: in  std_logic; \n")
     noc_file.write("\tclk: in  std_logic; \n")
     noc_file.write("\t--------------\n")
-    for i in range(network_dime**2):
+    for i in range(0, network_dime**2):
         noc_file.write("\t--------------\n")
         noc_file.write("\tRX_L_"+str(i)+": in std_logic_vector (DATA_WIDTH-1 downto 0);\n")
         noc_file.write("\tcredit_out_L_"+str(i)+", valid_out_L_"+str(i)+": out std_logic;\n")
         noc_file.write("\tcredit_in_L_"+str(i)+", valid_in_L_"+str(i)+": in std_logic;\n")
-        if i == network_dime**2-1 and add_SHMU== False:
+        if i == network_dime**2-1:
             noc_file.write("\tTX_L_"+str(i)+": out std_logic_vector (DATA_WIDTH-1 downto 0)\n")
         else:
             noc_file.write("\tTX_L_"+str(i)+": out std_logic_vector (DATA_WIDTH-1 downto 0);\n")

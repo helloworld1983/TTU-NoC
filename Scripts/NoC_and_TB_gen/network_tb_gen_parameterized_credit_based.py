@@ -7,10 +7,6 @@ import sys
 network_dime = 4
 data_width = 32
 random_dest = False
-add_tracker = True
-add_SHMU = False
-add_node = False
-add_NI_Test = False
 got_finish_time = False
 sim_finish_time = None
 bit_reversal = False
@@ -140,9 +136,6 @@ for i in range(0, network_dime*network_dime):
     noc_file.write("\tsignal RX_L_"+str(i)+", TX_L_"+str(i)+":  std_logic_vector ("+str(data_width-1)+" downto 0);\n")
     noc_file.write("\tsignal credit_counter_out_"+str(i)+":  std_logic_vector (1 downto 0);\n")
     noc_file.write("\tsignal credit_out_L_"+str(i)+", credit_in_L_"+str(i)+", valid_in_L_"+str(i)+", valid_out_L_"+str(i) + ": std_logic;\n")
-
-
-
 
 noc_file.write("\t--------------\n")
 noc_file.write("\tconstant clk_period : time := 10 ns;\n")

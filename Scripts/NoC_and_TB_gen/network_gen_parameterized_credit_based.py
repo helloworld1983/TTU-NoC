@@ -26,7 +26,6 @@ noc_file.write("-- Here are the parameters:\n")
 noc_file.write("-- \t network size x: "+str(CB_Package.network_dime)+"\n")
 noc_file.write("-- \t network size y: "+str(CB_Package.network_dime)+"\n")
 noc_file.write("-- \t Data width: "+str(CB_Package.data_width)+"\n")
-noc_file.write("-- \t Parity: "+str(CB_Package.add_parity)+"\n")
 noc_file.write("------------------------------------------------------------\n\n")
 
 noc_file.write("library ieee;\n")

@@ -20,8 +20,6 @@ def write_do_file(program_argv, net_file_name, net_tb_file_name, wave_do_file_na
     """
 
     logging.info("Generating simulation.do")
-    if program_argv['credit_based_FC']:
-        flow_control_type = CREDIT_BASED_SUFFIX
 
     do_file = open(SIMUL_DIR + "/" + SIMUL_DO_SCRIPT, 'w')
 
@@ -40,15 +38,15 @@ def write_do_file(program_argv, net_file_name, net_tb_file_name, wave_do_file_na
     List_of_files = file_lists.credit_based_files
 
     for file in List_of_files:
-        do_file.write(include_cmd(file) + " \"" + ROUTER_RTL_DIR + "/RTL/baseLine/"+file+"\"\n")
+        do_file.write(include_cmd(file) + " \"" + ROUTER_RTL_DIR + "/RTL/base_line/"+file+"\"\n")
 
-    do_file.write("vcom \"" + ROUTER_RTL_DIR + "/RTL/baseLine/Router_32_bit_credit_based.vhd\"\n")
+    do_file.write("vcom \"" + ROUTER_RTL_DIR + "/RTL/base_line/Router_32_bit_credit_based.vhd\"\n")
 
-    do_file.write("vcom \"" + TEST_DIR + "/" + flow_control_type \
-                  + "/TB_Package_32_bit_" + flow_control_type + ".vhd\"\n")
+    do_file.write("vcom \"" + TEST_DIR + "/" + CREDIT_BASED_SUFFIX \
+                  + "/TB_Package_32_bit_" + CREDIT_BASED_SUFFIX + ".vhd\"\n")
 
     if program_argv['trace'] :
-        do_file.write("vcom \"" + ROUTER_RTL_DIR + "/RTL/baseLine/flit_tracker.vhd\"\n")
+        do_file.write("vcom \"" + ROUTER_RTL_DIR + "/RTL/base_line/flit_tracker.vhd\"\n")
 
     # Generated network files
     do_file.write("vcom \"" +  net_file_name + "\"\n")
