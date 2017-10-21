@@ -1,6 +1,0 @@
-v 3
-file / "/var/folders/_l/9_pwwk9j6g506vm2j1xncpp40000gn/T/SublimeLinter3-siavoosh/router_pack.vhd" "20171021103506.000" "20171021133506.594":
-  package router_pack at 18( 775) + 0 on 40;
-file / "/var/folders/_l/9_pwwk9j6g506vm2j1xncpp40000gn/T/SublimeLinter3-siavoosh/Router_32_bit_credit_based.vhd" "20171021102702.000" "20171021132702.552":
-  entity router_credit_based at 3( 45) + 0 on 19;
-  architecture behavior of router_credit_based at 32( 962) + 0 on 20;

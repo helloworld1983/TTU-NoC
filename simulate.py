@@ -117,7 +117,7 @@ def main(argv):
     else:
         statistics(False)
 
-    if package.program_argv["trace"] and Viz == True:
+    if Viz == True:
         viz_traffic(package.program_argv["network_dime"])
 
     logging.info('Logging finished...')

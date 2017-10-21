@@ -36,28 +36,20 @@ noc_file.write("use IEEE.STD_LOGIC_UNSIGNED.ALL;\n")
 noc_file.write("USE ieee.numeric_std.ALL; \n")
 noc_file.write("\n")
 
-generate_entity(noc_file, CB_Package.network_dime, CB_Package.add_SHMU)
+generate_entity(noc_file, CB_Package.network_dime)
 
 noc_file.write("\n\n")
 noc_file.write("architecture behavior of network_"+str(CB_Package.network_dime)+"x" +
                str(CB_Package.network_dime)+" is\n\n")
 
 # declaring components, signals and making ascii art!!!
-declare_components(noc_file, CB_Package.add_parity, CB_Package.add_SHMU,
-                   CB_Package.add_packet_drop, CB_Package.add_FC, CB_Package.add_tracker)
-
-declare_signals(noc_file, CB_Package.network_dime, CB_Package.add_parity, CB_Package.add_packet_drop,
-                CB_Package.add_FC, CB_Package.add_SHMU)
-
+declare_components(noc_file)
+declare_signals(noc_file, CB_Package.network_dime)
 generate_ascii_art(noc_file, CB_Package.network_dime)
 
 
 noc_file.write("begin\n\n\n")
-
-#todo: One should be able to control the threshold values!
-
-instantiate_routers(noc_file, CB_Package.network_dime, CB_Package.add_parity, CB_Package.add_packet_drop,
-                    CB_Package.add_FC, CB_Package.add_SHMU, CB_Package.healthy_counter_threshold, CB_Package.faulty_counter_threshold, CB_Package.counter_depth)
+instantiate_routers(noc_file, CB_Package.network_dime)
 
 
 noc_file.write("---------------------------------------------------------------\n")
@@ -83,20 +75,20 @@ for i in range(0, CB_Package.network_dime**2):
         noc_file.write("RX_W_"+str(i+1)+" <= TX_E_"+str(i)+";\n")
         noc_file.write("-------------------\n")
 
-if CB_Package.add_tracker:
-    noc_file.write("-- instantiating the flit trackers\n")
-    for i in range(0, CB_Package.network_dime**2):
-        node_x = i % CB_Package.network_dime
-        node_y = i / CB_Package.network_dime
-        for input_port  in ['N', 'E', 'W', 'S', 'L']:
-            noc_file.write("F_T_"+str(i)+"_"+input_port+": flit_tracker  generic map (\n")
-            noc_file.write("        DATA_WIDTH => DATA_WIDTH, \n")
-            noc_file.write("        tracker_file =>\"traces/track"+str(i)+"_"+input_port+".txt\"\n")
-            noc_file.write("    )\n")
-            noc_file.write("    port map (\n")
-            noc_file.write("        clk => clk, RX => RX_"+input_port+"_"+str(i)+", \n")
-            noc_file.write("        valid_in => valid_in_"+input_port+"_"+str(i)+"\n")
-            noc_file.write("    );\n")
+
+noc_file.write("-- instantiating the flit trackers\n")
+for i in range(0, CB_Package.network_dime**2):
+    node_x = i % CB_Package.network_dime
+    node_y = i / CB_Package.network_dime
+    for input_port  in ['N', 'E', 'W', 'S', 'L']:
+        noc_file.write("F_T_"+str(i)+"_"+input_port+": flit_tracker  generic map (\n")
+        noc_file.write("        DATA_WIDTH => DATA_WIDTH, \n")
+        noc_file.write("        tracker_file =>\"traces/track"+str(i)+"_"+input_port+".txt\"\n")
+        noc_file.write("    )\n")
+        noc_file.write("    port map (\n")
+        noc_file.write("        clk => clk, RX => RX_"+input_port+"_"+str(i)+", \n")
+        noc_file.write("        valid_in => valid_in_"+input_port+"_"+str(i)+"\n")
+        noc_file.write("    );\n")
 
 
 noc_file.write("---------------------------------------------------------------\n")
@@ -126,27 +118,4 @@ for i in range(0, CB_Package.network_dime**2):
         noc_file.write("credit_in_E_"+str(i)+" <= credit_out_W_"+str(i+1)+";\n")
         noc_file.write("-------------------\n")
 
-
-if (CB_Package.add_packet_drop and CB_Package.add_FC):
-    for i in range(0, CB_Package.network_dime**2):
-        north_node = i - CB_Package.network_dime
-        south_node = i + CB_Package.network_dime
-        west_node = i - 1
-        east_node = i + 1
-
-        node_x = i % CB_Package.network_dime
-        node_y = i / CB_Package.network_dime
-
-
-        if node_y > 0:
-            noc_file.write("Faulty_N_in"+str(i)+" <= Faulty_S_out"+str(north_node)+";\n")
-
-        if node_y < CB_Package.network_dime-1:
-            noc_file.write("Faulty_S_in"+str(i)+" <= Faulty_N_out"+str(south_node)+";\n")
-
-        if node_x > 0:
-            noc_file.write("Faulty_W_in"+str(i)+" <= Faulty_E_out"+str(west_node)+";\n")    
-        
-        if node_x < CB_Package.network_dime-1:
-            noc_file.write("Faulty_E_in"+str(i)+" <= Faulty_W_out"+str(east_node)+";\n")  
 noc_file.write("end;\n")

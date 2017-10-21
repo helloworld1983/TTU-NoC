@@ -19,12 +19,7 @@ TRACE_DIR = SIMUL_DIR+ "/traces"
 
 # Subfolders
 SCRIPTS_DIR = PROJECT_ROOT + "/Scripts"
-TEST_DIR = PROJECT_ROOT + "/Test"
-ROUTER_RTL_DIR = PROJECT_ROOT + "/RTL/Router"
-IMMORTAL_CHIP_DIR = PROJECT_ROOT + "/RTL/Chip_Designs/archive/IMMORTAL_Chip_2017/With_checkers"
-IMMORTAL_CHIP_FI_DIR = PROJECT_ROOT + "/RTL/Chip_Designs/IMMORTAL_Chip_2017/network_files"
-FAULT_MANAGEMENT_RTL_DIR = PROJECT_ROOT + "/RTL/Fault_Management"
-CHECKERS_DIR = "/Checkers/Modules_with_checkers_integrated/All_checkers"
+TEST_DIR = PROJECT_ROOT + "/Packages"
 
 
 # Flow control suffixes
@@ -43,15 +38,6 @@ LATENCY_CALCULATION_PATH = "calculate_latency.py"
 program_argv = {
         'network_dime':    4,
         'credit_based_FC': False,
-        'add_parity':      False,
-        'add_checkers':    False,
-        'packet_drop':     False,
-        'add_NI':          -1,
-        'NI_Test':         False,
-        'add_FI':          False,
-        'add_FC':          False,
-        'add_FO':          False,
-        'add_SHMU':        False,
         'rand':            -1,
         'BR':              -1,
         'PS':              [3,8],
@@ -60,7 +46,6 @@ program_argv = {
         'lat':             False,
         'debug':           False,
         'trace':           False,
-        'verilog':         False,
         'command-line':    False,
     }
 
