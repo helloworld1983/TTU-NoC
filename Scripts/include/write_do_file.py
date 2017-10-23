@@ -2,7 +2,6 @@
 import file_lists
 from Scripts.include.package import *
 from math import ceil
-from fault_injector_do import generate_links_dictionary, generate_fault_injection_do
 
 def include_cmd(path):
     if path.endswith(('.vhd', '.vhdl')):
@@ -34,6 +33,8 @@ def write_do_file(program_argv, net_file_name, net_tb_file_name, wave_do_file_na
 
     do_file.write("# Include files and compile them\n")
 
+    do_file.write("vcom \"" + TEST_DIR  \
+                  + "/router_pack.vhd"+"\"\n")
 
     List_of_files = file_lists.credit_based_files
 
@@ -42,7 +43,7 @@ def write_do_file(program_argv, net_file_name, net_tb_file_name, wave_do_file_na
 
     do_file.write("vcom \"" + ROUTER_RTL_DIR + "/RTL/base_line/Router_32_bit_credit_based.vhd\"\n")
 
-    do_file.write("vcom \"" + TEST_DIR + "/" + CREDIT_BASED_SUFFIX \
+    do_file.write("vcom \"" + TEST_DIR \
                   + "/TB_Package_32_bit_" + CREDIT_BASED_SUFFIX + ".vhd\"\n")
 
     if program_argv['trace'] :
@@ -65,7 +66,7 @@ def write_do_file(program_argv, net_file_name, net_tb_file_name, wave_do_file_na
     do_file.write("vcd file wave.vcd\n")
     do_file.write("vcd add -r -optcells /*\n")
 
-    
+
     do_file.write("run " + str(program_argv['end']) + " ns\n")
 
     do_file.write("vcd flush\n")

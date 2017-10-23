@@ -19,6 +19,7 @@ TRACE_DIR = SIMUL_DIR+ "/traces"
 
 # Subfolders
 SCRIPTS_DIR = PROJECT_ROOT + "/Scripts"
+ROUTER_RTL_DIR = PROJECT_ROOT
 TEST_DIR = PROJECT_ROOT + "/Packages"
 
 
@@ -51,6 +52,3 @@ program_argv = {
 
 # Debug mode is off by default
 DEBUG = False
-
-
-

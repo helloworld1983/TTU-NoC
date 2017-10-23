@@ -45,8 +45,15 @@ def print_help(argv, program_argv):
     print BOLD + "  --trace:" + ENDC
     print "\tadds packet tracing."
     print
-    print
+    print "---------"*5
     print BOLD + OKBLUE + "  Examples:" + ENDC
     print BOLD + "  Example 1:" + ENDC
+    print "\t\tcommand: python simulate.py -D 4 -Rand 0.01 -PS 8 8 -sim 10000 -end 12000"
+    print "\t\tdetails: runs a 4x4 network with packet injection rate of 0.01 and packet size of 8."
+    print "\t\t         the injection of packets would stop at 10000 ns and simulation will stop "
+    print "\t\t         at 12000 ns."
     print BOLD + "  Example 2:" + ENDC
-   
+    print "\t\tcommand: python simulate.py -D 2 -Rand 0.02 -PS 8 8 -sim 10000 -end 12000 -lat"
+    print "\t\tdetails: runs a 2x2 network with packet injection rate of 0.02 and packet size of 8."
+    print "\t\t         the injection of packets would stop at 10000 ns and simulation will stop "
+    print "\t\t         at 12000 ns. at the end of simulation the tool reports the latency results!"

@@ -18,7 +18,7 @@ from Scripts.include.stats import statistics
 
 try:
     from Scripts.include.viz_traffic import viz_traffic
-    Viz = True
+    Viz = False
 except:
     print_msg(MSG_INFO, "Can not include the visualizer! Some library is missing. Turning off the visualization!")
     Viz = False
@@ -87,8 +87,7 @@ def main(argv):
 
     os.chdir(package.SIMUL_DIR)
     if package.program_argv['command-line'] or package.program_argv['lat']:
-        novopt = '-novopt ' if package.program_argv['verilog'] else ''
-        return_value = os.system("vsim -c " + novopt + "-do " + package.SIMUL_DO_SCRIPT)
+        return_value = os.system("vsim -c " + "-do " + package.SIMUL_DO_SCRIPT)
     else:
         return_value = os.system("vsim -do " + package.SIMUL_DO_SCRIPT)
 
@@ -106,14 +105,14 @@ def main(argv):
         # Run latency calculation script
         latency_command = "python " + package.SCRIPTS_DIR + "/include/" + package.LATENCY_CALCULATION_PATH + " -S " + package.SIMUL_DIR+"/"+package.SENT_TXT_PATH + " -R " + package.SIMUL_DIR+"/"+package.RECEIVED_TXT_PATH
 
-        
+
         if DEBUG: print_msg(MSG_DEBUG, "Running latency calculator script:\n\t" + latency_command)
 
         return_value = os.system(latency_command)
         if return_value != 0:
             print_msg(MSG_ERROR, "Error while running latency calculation script")
             sys.exit(1)
-        
+
     else:
         statistics(False)
 

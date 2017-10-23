@@ -5,7 +5,7 @@ import os
 
 def gen_network_and_tb(program_argv, flow_control_type):
     """
-    Gets program arguments and flow control type and generates the Network and Testbench files 
+    Gets program arguments and flow control type and generates the Network and Testbench files
     by generating the correct name and then calling the related script
     """
 
@@ -16,7 +16,7 @@ def gen_network_and_tb(program_argv, flow_control_type):
         + ".vhd"
 
     # Command to run for network generation
-    net_gen_command = "python " + SCRIPTS_DIR + "/" + flow_control_type \
+    net_gen_command = "python " + SCRIPTS_DIR + "/NoC_and_TB_gen"  \
         + "/" + NET_GEN_SCRIPT + "_" + flow_control_type + ".py" \
         + " -D " + str(program_argv['network_dime']) \
         + " -o " + SIMUL_DIR + "/" + net_file_name
@@ -35,7 +35,7 @@ def gen_network_and_tb(program_argv, flow_control_type):
         + "_credit_based" \
         + "_tb.vhd"
 
-    net_tb_gen_command = "python " + SCRIPTS_DIR + "/" + flow_control_type \
+    net_tb_gen_command = "python " + SCRIPTS_DIR + "/NoC_and_TB_gen" \
         + "/" + NET_TB_GEN_SCRIPT + "_" + flow_control_type + ".py" \
         + " -D " + str(program_argv['network_dime']) \
         + (" -Rand " + str(program_argv['rand']) if program_argv['rand'] != -1 else "") \
@@ -63,7 +63,7 @@ def gen_wave_do(program_argv, flow_control_type):
     + (str(program_argv['network_dime']) + "x" + str(program_argv['network_dime'])) \
     + (".do")
 
-    wave_do_gen_command = "python " + SCRIPTS_DIR + "/" + flow_control_type + "/" \
+    wave_do_gen_command = "python " + SCRIPTS_DIR + "/NoC_and_TB_gen" +  "/" \
         + WAVE_DO_GEN_SCRIPT + "_" + flow_control_type + ".py" \
         + (" -D " + str(program_argv['network_dime'])) \
         + (" -o " + SIMUL_DIR + "/" + wave_do_file_name)
