@@ -65,14 +65,11 @@ def main(argv):
     DEBUG = package.program_argv['debug']
     report_parogram_arguments(package.program_argv, DEBUG)
 
-    if package.program_argv['credit_based_FC']:
-        flow_control_type = package.CREDIT_BASED_SUFFIX
-
+    flow_control_type = package.CREDIT_BASED_SUFFIX
     net_file_name, net_tb_file_name = gen_network_and_tb(package.program_argv, flow_control_type)
 
     # Generate wave.do
     wave_do_file_name = gen_wave_do(package.program_argv, flow_control_type)
-
     # Generate simulate.do
     if DEBUG: print_msg(MSG_DEBUG, "Generating simulation.do")
 
@@ -101,18 +98,19 @@ def main(argv):
     if package.program_argv['lat']:
         # Read sent packets
         statistics(True)
-
         # Run latency calculation script
-        latency_command = "python " + package.SCRIPTS_DIR + "/include/" + package.LATENCY_CALCULATION_PATH + " -S " + package.SIMUL_DIR+"/"+package.SENT_TXT_PATH + " -R " + package.SIMUL_DIR+"/"+package.RECEIVED_TXT_PATH
-
-
-        if DEBUG: print_msg(MSG_DEBUG, "Running latency calculator script:\n\t" + latency_command)
-
+        latency_command = "python " + package.SCRIPTS_DIR + "/include/" +\
+                           package.LATENCY_CALCULATION_PATH + " -S " +\
+                           package.SIMUL_DIR+"/"+package.SENT_TXT_PATH +\
+                           " -R " + package.SIMUL_DIR+"/"+\
+                           package.RECEIVED_TXT_PATH
+        if DEBUG:
+            print_msg(MSG_DEBUG, "Running latency calculator script:\n\t" +\
+                      latency_command)
         return_value = os.system(latency_command)
         if return_value != 0:
             print_msg(MSG_ERROR, "Error while running latency calculation script")
             sys.exit(1)
-
     else:
         statistics(False)
 

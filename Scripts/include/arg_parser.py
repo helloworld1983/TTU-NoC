@@ -20,7 +20,6 @@ def arg_parser(argv, program_argv, logging):
         logging.info("exiting the program!")
         sys.exit()
 
-    program_argv['credit_based_FC'] = True
     program_argv['network_dime'] = 4
     program_argv['lat'] = False
     program_argv['debug'] = False
