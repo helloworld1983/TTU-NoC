@@ -1,12 +1,11 @@
 # Copyright (C) 2016 Siavoosh Payandeh Azad
 
 
-def generate_entity(noc_file, network_dime):
+def generate_entity(noc_file, network_dime, vc):
     """
     noc_file:       string  : path to the network file
     network_dime:   integer : network size
     """
-    
     string_to_print = ""
     noc_file.write("entity network_"+str(network_dime)+"x"+str(network_dime)+" is\n")
 
@@ -19,6 +18,9 @@ def generate_entity(noc_file, network_dime):
         noc_file.write("\tRX_L_"+str(i)+": in std_logic_vector (DATA_WIDTH-1 downto 0);\n")
         noc_file.write("\tcredit_out_L_"+str(i)+", valid_out_L_"+str(i)+": out std_logic;\n")
         noc_file.write("\tcredit_in_L_"+str(i)+", valid_in_L_"+str(i)+": in std_logic;\n")
+        if vc:
+            noc_file.write("\tcredit_out_vc_L_"+str(i)+", valid_out_vc_L_"+str(i)+": out std_logic;\n")
+            noc_file.write("\tcredit_in_vc_L_"+str(i)+", valid_in_vc_L_"+str(i)+": in std_logic;\n")
         if i == network_dime**2-1:
             noc_file.write("\tTX_L_"+str(i)+": out std_logic_vector (DATA_WIDTH-1 downto 0)\n")
         else:

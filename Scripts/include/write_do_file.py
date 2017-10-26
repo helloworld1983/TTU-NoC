@@ -33,21 +33,30 @@ def write_do_file(program_argv, net_file_name, net_tb_file_name, wave_do_file_na
 
     do_file.write("# Include files and compile them\n")
 
-    do_file.write("vcom \"" + TEST_DIR  \
-                  + "/router_pack.vhd"+"\"\n")
+    if program_argv['vc']:
+        do_file.write("vcom \"" + TEST_DIR  \
+                      + "/router_pack_vc.vhd"+"\"\n")
+        List_of_files = file_lists.vc_files
+        for file in List_of_files:
+            do_file.write(include_cmd(file) + " \"" + ROUTER_VC_RTL_DIR +file+"\"\n")
+        do_file.write("vcom \"" + ROUTER_VC_RTL_DIR + "/Router_32_bit_credit_based.vhd\"\n")
 
-    List_of_files = file_lists.credit_based_files
+        do_file.write("vcom \"" + TEST_DIR \
+                      + "/TB_Package_32_bit_" + CREDIT_BASED_SUFFIX + "_vc.vhd\"\n")
+    else:
+        do_file.write("vcom \"" + TEST_DIR  \
+                      + "/router_pack.vhd"+"\"\n")
+        List_of_files = file_lists.credit_based_files
+        for file in List_of_files:
+            do_file.write(include_cmd(file) + " \"" + ROUTER_RTL_DIR +file+"\"\n")
 
-    for file in List_of_files:
-        do_file.write(include_cmd(file) + " \"" + ROUTER_RTL_DIR + "/RTL/base_line/"+file+"\"\n")
+        do_file.write("vcom \"" + ROUTER_RTL_DIR + "/Router_32_bit_credit_based.vhd\"\n")
 
-    do_file.write("vcom \"" + ROUTER_RTL_DIR + "/RTL/base_line/Router_32_bit_credit_based.vhd\"\n")
-
-    do_file.write("vcom \"" + TEST_DIR \
-                  + "/TB_Package_32_bit_" + CREDIT_BASED_SUFFIX + ".vhd\"\n")
+        do_file.write("vcom \"" + TEST_DIR \
+                      + "/TB_Package_32_bit_" + CREDIT_BASED_SUFFIX + ".vhd\"\n")
 
     if program_argv['trace'] :
-        do_file.write("vcom \"" + ROUTER_RTL_DIR + "/RTL/base_line/flit_tracker.vhd\"\n")
+        do_file.write("vcom \"" + ROUTER_RTL_DIR + "flit_tracker.vhd\"\n")
 
     # Generated network files
     do_file.write("vcom \"" +  net_file_name + "\"\n")

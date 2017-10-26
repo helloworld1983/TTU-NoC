@@ -3,13 +3,12 @@ from CB_functions import rxy_rst_calculator, cx_rst_calculator
 import math
 
 
-def instantiate_routers(noc_file, network_dime):
+def instantiate_routers(noc_file, network_dime, vc):
     """
     Instantiates the different routers based on the specified configuration!
     noc_file:      string   : destination file
     network_dime:  integer  : network size
     """
-
     noc_file.write("-- instantiating the routers\n")
     for i in range(0, network_dime**2):
 
@@ -27,6 +26,18 @@ def instantiate_routers(noc_file, network_dime):
                        ", valid_out_S_"+str(i)+", valid_out_L_"+str(i)+",\n")
         noc_file.write("\tcredit_out_N_"+str(i)+", credit_out_E_"+str(i)+", credit_out_W_"+str(i) +
                        ", credit_out_S_"+str(i)+", credit_out_L_"+str(i)+",\n")
+
+
+        if vc:
+
+            noc_file.write("\tcredit_in_vc_N_"+str(i)+", credit_in_vc_E_"+str(i)+", credit_in_vc_W_"+str(i) +
+                           ", credit_in_vc_S_"+str(i)+", credit_in_vc_L_"+str(i)+",\n")
+            noc_file.write("\tvalid_in_vc_N_"+str(i)+", valid_in_vc_E_"+str(i)+", valid_in_vc_W_"+str(i) +
+                           ", valid_in_vc_S_"+str(i)+", valid_in_vc_L_"+str(i)+",\n")
+            noc_file.write("\tvalid_out_vc_N_"+str(i)+", valid_out_vc_E_"+str(i)+", valid_out_vc_W_"+str(i) +
+                           ", valid_out_vc_S_"+str(i)+", valid_out_vc_L_"+str(i)+",\n")
+            noc_file.write("\tcredit_out_vc_N_"+str(i)+", credit_out_vc_E_"+str(i)+", credit_out_vc_W_"+str(i) +
+                           ", credit_out_vc_S_"+str(i)+", credit_out_vc_L_"+str(i)+",\n")
 
         noc_file.write("\tTX_N_"+str(i)+", TX_E_"+str(i)+", TX_W_"+str(i)+", TX_S_"+str(i)+", TX_L_"+str(i))
         noc_file.write("); \n\n")

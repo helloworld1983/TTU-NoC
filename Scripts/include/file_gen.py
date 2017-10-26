@@ -19,10 +19,11 @@ def gen_network_and_tb(program_argv, flow_control_type):
     net_gen_command = "python " + SCRIPTS_DIR + "/NoC_and_TB_gen"  \
         + "/" + NET_GEN_SCRIPT + "_" + flow_control_type + ".py" \
         + " -D " + str(program_argv['network_dime']) \
+        + (" -VC" if program_argv['vc'] else "") \
         + " -o " + SIMUL_DIR + "/" + net_file_name
 
     if DEBUG: print_msg(MSG_DEBUG, "Running network generator:\n\t" + net_gen_command)
-
+    
     return_value = os.system(net_gen_command)
     if return_value != 0:
         print_msg(MSG_ERROR, "Error while running network generation script")
@@ -39,6 +40,7 @@ def gen_network_and_tb(program_argv, flow_control_type):
         + "/" + NET_TB_GEN_SCRIPT + "_" + flow_control_type + ".py" \
         + " -D " + str(program_argv['network_dime']) \
         + (" -Rand " + str(program_argv['rand']) if program_argv['rand'] != -1 else "") \
+        + (" -VC " if program_argv['vc'] else "") \
         + (" -BR " + str(program_argv['BR']) if program_argv['BR'] != -1 else "") \
         + (" -PS " + str(program_argv['PS'][0]) + " " + str(program_argv['PS'][1])) \
         + (" -sim " + str(program_argv['sim']) if program_argv['sim'] != -1 else "") \

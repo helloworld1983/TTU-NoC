@@ -21,6 +21,7 @@ def arg_parser(argv, program_argv, logging):
         sys.exit()
 
     program_argv['network_dime'] = 4
+    program_argv['vc'] = False
     program_argv['lat'] = False
     program_argv['debug'] = False
     program_argv['trace'] = False
@@ -34,6 +35,9 @@ def arg_parser(argv, program_argv, logging):
 
     if '-lat' in argv[1:]:
         program_argv['lat'] = True
+
+    if '-vc' in argv[1:]:
+        program_argv['vc'] = True
 
     if '-Rand'	in argv[1:]:
         program_argv['rand'] = float(argv[argv.index('-Rand')+1])
