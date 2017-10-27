@@ -218,8 +218,13 @@ if random_dest or bit_reversal:
             noc_file.write("gen_random_packet("+str(network_dime)+", "+str(frame_size)+", "+str(i)+", "+str(random_start)+", " +str(packet_size_min)+", " +str(packet_size_max)+", " +
                           str(random_end)+" ns, clk, credit_counter_out_"+str(i)+", valid_in_L_"+str(i)+", RX_L_"+str(i)+");\n")
     elif bit_reversal:
-      noc_file.write("gen_bit_reversed_packet("+str(network_dime)+", "+str(frame_size)+", "+str(i)+", "+str(random_start)+", " +str(packet_size_min)+", " +str(packet_size_max)+", " +
+        if vc:
+            noc_file.write("gen_bit_reversed_packet("+str(network_dime)+", "+str(frame_size)+", "+str(i)+", "+str(random_start)+", " +str(packet_size_min)+", " +str(packet_size_max)+", " +
+                    str(random_end)+" ns, clk, credit_counter_out_"+str(i)+", valid_in_L_"+str(i)+", credit_counter_out_vc_"+str(i)+", valid_in_vc_L_"+str(i)+", RX_L_"+str(i)+");\n")
+        else:
+            noc_file.write("gen_bit_reversed_packet("+str(network_dime)+", "+str(frame_size)+", "+str(i)+", "+str(random_start)+", " +str(packet_size_min)+", " +str(packet_size_max)+", " +
                     str(random_end)+" ns, clk, credit_counter_out_"+str(i)+", valid_in_L_"+str(i)+", RX_L_"+str(i)+");\n")
+
     noc_file.write("\n")
 
 

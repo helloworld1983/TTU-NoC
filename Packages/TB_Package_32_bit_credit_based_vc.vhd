@@ -27,6 +27,7 @@ package TB_Package is
   procedure gen_bit_reversed_packet(network_size, frame_length, source, initial_delay, min_packet_size, max_packet_size: in integer;
                       finish_time: in time; signal clk: in std_logic;
                       signal credit_counter_in: in std_logic_vector(1 downto 0); signal valid_out: out std_logic;
+                      signal credit_counter_in_vc: in std_logic_vector(1 downto 0); signal valid_out_vc: out std_logic;
                       signal port_in: out std_logic_vector);
   procedure get_packet(DATA_WIDTH, initial_delay, Node_ID: in integer; signal clk: in std_logic;
                      signal credit_out: out std_logic; signal valid_in: in std_logic;
@@ -147,10 +148,17 @@ package body TB_Package is
 
       valid_out <= '0';
       valid_out_vc <= '0';
+
       if vc = 0 then
         while credit_counter_in = 0 loop
           wait until clk'event and clk ='0';
         end loop;
+      else
+        while credit_counter_in_vc = 0 loop
+          wait until clk'event and clk ='0';
+        end loop;
+      end if;
+
 
       -- generating the packet
       id_counter := id_counter + 1;
@@ -174,21 +182,42 @@ package body TB_Package is
           destination_id := integer(rand*real((network_size**2)-1));
       end loop;
       --------------------------------------
-      write(LINEVARIABLE, "Packet generated at " & time'image(now) & " From " & integer'image(source) & " to " & integer'image(destination_id) & " with length: " & integer'image(Packet_length) & " id: " & integer'image(id_counter) & " vc: 0");
+      if vc = 0 then
+          write(LINEVARIABLE, "Packet generated at " & time'image(now) & " From " & integer'image(source) & " to " & integer'image(destination_id) & " with length: " & integer'image(Packet_length) & " id: " & integer'image(id_counter) & " vc: 0");
+      else
+          write(LINEVARIABLE, "Packet generated at " & time'image(now) & " From " & integer'image(source) & " to " & integer'image(destination_id) & " with length: " & integer'image(Packet_length) & " id: " & integer'image(id_counter)& " vc: 1");
+      end if;
+
       writeline(VEC_FILE, LINEVARIABLE);
       wait until clk'event and clk ='0'; -- On negative edge of clk (for syncing purposes)
       port_in <= Header_gen(source, destination_id); -- Generating the header flit of the packet (All packets have a header flit)!
-      valid_out <= '1';
+
+      if vc = 0 then
+        valid_out <= '1';
+      else
+        valid_out_vc <= '1';
+      end if;
+
       wait until clk'event and clk ='0';
 
       for I in 0 to Packet_length-3 loop
             -- The reason for -3 is that we have packet length of Packet_length, now if you exclude header and tail
             -- it would be Packet_length-2 to enumerate them, you can count from 0 to Packet_length-3.
-            if credit_counter_in = "00" then
-             valid_out <= '0';
-             -- Wait until next router/NI has at least enough space for one flit in its input FIFO
-             wait until credit_counter_in'event and credit_counter_in > 0;
-             wait until clk'event and clk ='0';
+
+            if vc = 0 then
+                if credit_counter_in = "00" then
+                    valid_out <= '0';
+                    -- Wait until next router/NI has at least enough space for one flit in its input FIFO
+                    wait until credit_counter_in'event and credit_counter_in > 0;
+                    wait until clk'event and clk ='0';
+                end if;
+            else
+                if credit_counter_in_vc = "00" then
+                    valid_out_vc <= '0';
+                    -- Wait until next router/NI has at least enough space for one flit in its input FIFO
+                    wait until credit_counter_in_vc'event and credit_counter_in_vc > 0;
+                    wait until clk'event and clk ='0';
+                end if;
             end if;
 
             uniform(seed1, seed2, rand);
@@ -198,41 +227,117 @@ package body TB_Package is
             else
               port_in <= Body_gen(integer(rand*1000.0));
             end if;
-             valid_out <= '1';
-             wait until clk'event and clk ='0';
+
+            if vc = 0 then
+              valid_out <= '1';
+            else
+              valid_out_vc <= '1';
+            end if;
+
+            wait until clk'event and clk ='0';
       end loop;
 
-      if credit_counter_in = "00" then
-             valid_out <= '0';
-             -- Wait until next router/NI has at least enough space for one flit in its input FIFO
-             wait until credit_counter_in'event and credit_counter_in > 0;
-             wait until clk'event and clk ='0';
+      if vc = 0 then
+          if credit_counter_in = "00" then
+              valid_out <= '0';
+              -- Wait until next router/NI has at least enough space for one flit in its input FIFO
+              wait until credit_counter_in'event and credit_counter_in > 0;
+              wait until clk'event and clk ='0';
+          end if;
+      else
+          if credit_counter_in_vc = "00" then
+              valid_out_vc <= '0';
+              -- Wait until next router/NI has at least enough space for one flit in its input FIFO
+              wait until credit_counter_in_vc'event and credit_counter_in_vc > 0;
+              wait until clk'event and clk ='0';
+          end if;
       end if;
-
 
       uniform(seed1, seed2, rand);
       -- Close the packet with a tail flit (All packets have one tail flit)!
       port_in <= Tail_gen(Packet_length, integer(rand*1000.0));
-      valid_out <= '1';
+      if vc = 0 then
+        valid_out <= '1';
+      else
+        valid_out_vc <= '1';
+      end if;
       wait until clk'event and clk ='0';
 
-      valid_out <= '0';
+      if vc = 0 then
+        valid_out <= '0';
+      else
+        valid_out_vc <= '0';
+      end if;
       port_in <= "ZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZ" ;
 
       for l in 0 to frame_ending_delay-1 loop
          wait until clk'event and clk ='0';
       end loop;
       port_in <= "UUUUUUUUUUUUUUUUUUUUUUUUUUUUUUUU" ;
-
       if now > finish_time then
           wait;
       end if;
+    end loop;
+  end gen_random_packet;
 
+procedure gen_bit_reversed_packet(network_size, frame_length, source, initial_delay, min_packet_size, max_packet_size: in integer;
+                    finish_time: in time; signal clk: in std_logic;
+                    signal credit_counter_in: in std_logic_vector(1 downto 0); signal valid_out: out std_logic;
+                    signal credit_counter_in_vc: in std_logic_vector(1 downto 0); signal valid_out_vc: out std_logic;
+                    signal port_in: out std_logic_vector) is
+  variable seed1 :positive := source+1;
+  variable seed2 :positive := source+1;
+  variable LINEVARIABLE : line;
+  file VEC_FILE : text is out "sent.txt";
+  variable rand : real ;
+  variable destination_id: integer;
+  variable id_counter, frame_starting_delay, Packet_length, frame_ending_delay : integer:= 0;
+  variable credit_counter: std_logic_vector (1 downto 0);
+  variable vc: integer:= 0;
+  begin
+
+  Packet_length := integer((integer(rand*100.0)*frame_length)/100);
+  valid_out <= '0';
+  valid_out_vc <= '0';
+  port_in <= "XXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX" ;
+  wait until clk'event and clk ='1';
+  for i in 0 to initial_delay loop
+    wait until clk'event and clk ='1';
+  end loop;
+  port_in <= "UUUUUUUUUUUUUUUUUUUUUUUUUUUUUUUU" ;
+
+  while true loop
+    -- choose vc
+    uniform(seed1, seed2, rand);
+    if (integer(rand*2.0) > 1) then
+      vc := 1;
     else
-      --vc stuff
+      vc := 0;
+    end if;
+
+    --generating the frame initial delay
+    uniform(seed1, seed2, rand);
+    frame_starting_delay := integer(((integer(rand*100.0)*(frame_length - Packet_length-1)))/100);
+    --generating the frame ending delay
+    frame_ending_delay := frame_length - (Packet_length+frame_starting_delay);
+
+    for k in 0 to frame_starting_delay-1 loop
+        wait until clk'event and clk ='0';
+    end loop;
+
+    valid_out <= '0';
+    valid_out_vc <= '0';
+
+    if vc = 0 then
+      while credit_counter_in = 0 loop
+        wait until clk'event and clk ='0';
+      end loop;
+    else
       while credit_counter_in_vc = 0 loop
         wait until clk'event and clk ='0';
       end loop;
+    end if;
+
 
     -- generating the packet
     id_counter := id_counter + 1;
@@ -256,21 +361,42 @@ package body TB_Package is
         destination_id := integer(rand*real((network_size**2)-1));
     end loop;
     --------------------------------------
-    write(LINEVARIABLE, "Packet generated at " & time'image(now) & " From " & integer'image(source) & " to " & integer'image(destination_id) & " with length: " & integer'image(Packet_length) & " id: " & integer'image(id_counter)& " vc: 1");
+    if vc = 0 then
+        write(LINEVARIABLE, "Packet generated at " & time'image(now) & " From " & integer'image(source) & " to " & integer'image(destination_id) & " with length: " & integer'image(Packet_length) & " id: " & integer'image(id_counter) & " vc: 0");
+    else
+        write(LINEVARIABLE, "Packet generated at " & time'image(now) & " From " & integer'image(source) & " to " & integer'image(destination_id) & " with length: " & integer'image(Packet_length) & " id: " & integer'image(id_counter)& " vc: 1");
+    end if;
+
     writeline(VEC_FILE, LINEVARIABLE);
     wait until clk'event and clk ='0'; -- On negative edge of clk (for syncing purposes)
     port_in <= Header_gen(source, destination_id); -- Generating the header flit of the packet (All packets have a header flit)!
-    valid_out_vc <= '1';
+
+    if vc = 0 then
+      valid_out <= '1';
+    else
+      valid_out_vc <= '1';
+    end if;
+
     wait until clk'event and clk ='0';
 
     for I in 0 to Packet_length-3 loop
           -- The reason for -3 is that we have packet length of Packet_length, now if you exclude header and tail
           -- it would be Packet_length-2 to enumerate them, you can count from 0 to Packet_length-3.
-          if credit_counter_in_vc = "00" then
-           valid_out_vc <= '0';
-           -- Wait until next router/NI has at least enough space for one flit in its input FIFO
-           wait until credit_counter_in_vc'event and credit_counter_in_vc > 0;
-           wait until clk'event and clk ='0';
+
+          if vc = 0 then
+              if credit_counter_in = "00" then
+                  valid_out <= '0';
+                  -- Wait until next router/NI has at least enough space for one flit in its input FIFO
+                  wait until credit_counter_in'event and credit_counter_in > 0;
+                  wait until clk'event and clk ='0';
+              end if;
+          else
+              if credit_counter_in_vc = "00" then
+                  valid_out_vc <= '0';
+                  -- Wait until next router/NI has at least enough space for one flit in its input FIFO
+                  wait until credit_counter_in_vc'event and credit_counter_in_vc > 0;
+                  wait until clk'event and clk ='0';
+              end if;
           end if;
 
           uniform(seed1, seed2, rand);
@@ -280,148 +406,57 @@ package body TB_Package is
           else
             port_in <= Body_gen(integer(rand*1000.0));
           end if;
-           valid_out_vc <= '1';
-           wait until clk'event and clk ='0';
+
+          if vc = 0 then
+            valid_out <= '1';
+          else
+            valid_out_vc <= '1';
+          end if;
+
+          wait until clk'event and clk ='0';
     end loop;
 
-    if credit_counter_in_vc = "00" then
-           valid_out_vc <= '0';
-           -- Wait until next router/NI has at least enough space for one flit in its input FIFO
-           wait until credit_counter_in_vc'event and credit_counter_in_vc > 0;
-           wait until clk'event and clk ='0';
+    if vc = 0 then
+        if credit_counter_in = "00" then
+            valid_out <= '0';
+            -- Wait until next router/NI has at least enough space for one flit in its input FIFO
+            wait until credit_counter_in'event and credit_counter_in > 0;
+            wait until clk'event and clk ='0';
+        end if;
+    else
+        if credit_counter_in_vc = "00" then
+            valid_out_vc <= '0';
+            -- Wait until next router/NI has at least enough space for one flit in its input FIFO
+            wait until credit_counter_in_vc'event and credit_counter_in_vc > 0;
+            wait until clk'event and clk ='0';
+        end if;
     end if;
-
 
     uniform(seed1, seed2, rand);
     -- Close the packet with a tail flit (All packets have one tail flit)!
     port_in <= Tail_gen(Packet_length, integer(rand*1000.0));
-    valid_out_vc <= '1';
+    if vc = 0 then
+      valid_out <= '1';
+    else
+      valid_out_vc <= '1';
+    end if;
     wait until clk'event and clk ='0';
 
-    valid_out_vc <= '0';
+    if vc = 0 then
+      valid_out <= '0';
+    else
+      valid_out_vc <= '0';
+    end if;
     port_in <= "ZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZ" ;
 
     for l in 0 to frame_ending_delay-1 loop
        wait until clk'event and clk ='0';
     end loop;
     port_in <= "UUUUUUUUUUUUUUUUUUUUUUUUUUUUUUUU" ;
-
     if now > finish_time then
         wait;
     end if;
-    end if;
-    end loop;
-  end gen_random_packet;
-
-procedure gen_bit_reversed_packet(network_size, frame_length, source, initial_delay, min_packet_size, max_packet_size: in integer;
-                      finish_time: in time; signal clk: in std_logic;
-                      signal credit_counter_in: in std_logic_vector(1 downto 0); signal valid_out: out std_logic;
-                      signal port_in: out std_logic_vector) is
-    variable seed1 :positive := source+1;
-    variable seed2 :positive := source+1;
-    variable LINEVARIABLE : line;
-    file VEC_FILE : text is out "sent.txt";
-    variable rand : real ;
-    variable destination_id: integer;
-    variable id_counter, frame_starting_delay, Packet_length, frame_ending_delay : integer:= 0;
-    variable credit_counter: std_logic_vector (1 downto 0);
-    begin
-
-    Packet_length := integer((integer(rand*100.0)*frame_length)/300);
-    valid_out <= '0';
-    port_in <= "XXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX" ;
-    wait until clk'event and clk ='1';
-    for i in 0 to initial_delay loop
-      wait until clk'event and clk ='1';
-    end loop;
-    port_in <= "UUUUUUUUUUUUUUUUUUUUUUUUUUUUUUUU" ;
-
-    while true loop
-
-      --generating the frame initial delay
-      uniform(seed1, seed2, rand);
-      frame_starting_delay := integer(((integer(rand*100.0)*(frame_length - 3*Packet_length)))/100);
-      --generating the frame ending delay
-      frame_ending_delay := frame_length - (3*Packet_length+frame_starting_delay);
-
-      for k in 0 to frame_starting_delay-1 loop
-          wait until clk'event and clk ='0';
-      end loop;
-
-      valid_out <= '0';
-      while credit_counter_in = 0 loop
-        wait until clk'event and clk ='0';
-      end loop;
-
-
-      -- generating the packet
-      id_counter := id_counter + 1;
-      if id_counter = 16384 then
-          id_counter := 0;
-      end if;
-      --------------------------------------
-      uniform(seed1, seed2, rand);
-      Packet_length := integer((integer(rand*100.0)*frame_length)/300);
-      if (Packet_length < min_packet_size) then
-          Packet_length:=min_packet_size;
-      end if;
-      if (Packet_length > max_packet_size) then
-          Packet_length:=max_packet_size;
-      end if;
-      --------------------------------------
-      destination_id := to_integer(unsigned(not std_logic_vector(to_unsigned(source, network_size))));
-      if destination_id = source then
-        wait;
-      end if;
-      --------------------------------------
-      write(LINEVARIABLE, "Packet generated at " & time'image(now) & " From " & integer'image(source) & " to " & integer'image(destination_id) & " with length: " & integer'image(Packet_length) & " id: " & integer'image(id_counter));
-      writeline(VEC_FILE, LINEVARIABLE);
-      wait until clk'event and clk ='0';
-      port_in <= Header_gen(source, destination_id); -- Generating the header flit of the packet (All packets have a header flit)!
-      valid_out <= '1';
-      wait until clk'event and clk ='0';
-
-      for I in 0 to Packet_length-3 loop
-            if credit_counter_in = "00" then
-             valid_out <= '0';
-             wait until credit_counter_in'event and credit_counter_in >0;
-             wait until clk'event and clk ='0';
-            end if;
-
-            uniform(seed1, seed2, rand);
-            if I = 0 then
-              port_in <= Body_1_gen(Packet_length, id_counter);
-            else
-              port_in <= Body_gen(integer(rand*1000.0));
-            end if;
-            valid_out <= '1';
-             wait until clk'event and clk ='0';
-      end loop;
-
-      if credit_counter_in = "00" then
-             valid_out <= '0';
-             wait until credit_counter_in'event and credit_counter_in >0;
-             wait until clk'event and clk ='0';
-      end if;
-
-
-      uniform(seed1, seed2, rand);
-      port_in <= Tail_gen(Packet_length, integer(rand*1000.0));
-      valid_out <= '1';
-      wait until clk'event and clk ='0';
-
-      valid_out <= '0';
-      port_in <= "ZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZ" ;
-
-      for l in 0 to frame_ending_delay-1 loop
-         wait until clk'event and clk ='0';
-      end loop;
-      port_in <= "UUUUUUUUUUUUUUUUUUUUUUUUUUUUUUUU" ;
-
-      if now > finish_time then
-          wait;
-      end if;
-    end loop;
+  end loop;
   end gen_bit_reversed_packet;
 
 
