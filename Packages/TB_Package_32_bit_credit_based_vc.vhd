@@ -524,16 +524,9 @@ procedure gen_bit_reversed_packet(network_size, frame_length, source, initial_de
                end if;
                if (port_in(DATA_WIDTH-1 downto DATA_WIDTH-3) = "100") then
                    counter_vc := counter_vc+1;
-                   if VC = 1 then
                      report "Node: " & integer'image(Node_ID) & "    Packet received at " & time'image(now) & " From " & integer'image(source_node_vc) & " to " & integer'image(destination_node_vc) & " with length: "& integer'image(P_length_vc) & " counter: "& integer'image(counter_vc) & " vc: 1";
-                     write(LINEVARIABLE, "Packet received at " & time'image(now) & " From: " & integer'image(source_node_vc) & " to: " & integer'image(destination_node_vc) & " length: "& integer'image(P_length) & " actual length: "& integer'image(counter)  & " id: "& integer'image(packet_id)& " vc: 1");
+                     write(LINEVARIABLE, "Packet received at " & time'image(now) & " From: " & integer'image(source_node_vc) & " to: " & integer'image(destination_node_vc) & " length: "& integer'image(P_length_vc) & " actual length: "& integer'image(counter_vc)  & " id: "& integer'image(packet_id_vc)& " vc: 1");
                      writeline(VEC_FILE, LINEVARIABLE);
-                   else
-                     report "Node: " & integer'image(Node_ID) & "    Packet received at " & time'image(now) & " From " & integer'image(source_node_vc) & " to " & integer'image(destination_node_vc) & " with length: "& integer'image(P_length_vc) & " counter: "& integer'image(counter_vc) & " vc: 0";
-                     write(LINEVARIABLE, "Packet received at " & time'image(now) & " From: " & integer'image(source_node_vc) & " to: " & integer'image(destination_node_vc) & " length: "& integer'image(P_length_vc) & " actual length: "& integer'image(counter_vc)  & " id: "& integer'image(packet_id_vc)& " vc: 0");
-                     writeline(VEC_FILE, LINEVARIABLE);
-                   end if;
-
                  assert (P_length=counter_vc) report "wrong packet size" severity warning;
                  assert (Node_ID=destination_node_vc) report "wrong packet destination " severity failure;
                   counter_vc := 0;
