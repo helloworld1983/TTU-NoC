@@ -97,7 +97,7 @@ def main(argv):
     logging.info('starting latency calculation...')
     if package.program_argv['lat']:
         # Read sent packets
-        statistics(True)
+        statistics(False)
         # Run latency calculation script
         latency_command = "python " + package.SCRIPTS_DIR + "/include/" +\
                            package.LATENCY_CALCULATION_PATH + " -S " +\

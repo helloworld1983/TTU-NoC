@@ -16,6 +16,9 @@ def print_help(argv, program_argv):
     print BOLD + "  -vc :" + ENDC
     print "\tAdds virtual channels! "
     print
+    print BOLD + "  -NI [NI depth] :" + ENDC
+    print "\tAdds NI with designated depth! "
+    print
     print BOLD + OKBLUE + "  Simulation parameters:" + ENDC
     print BOLD + "  -Rand [PIR]:" + ENDC
     print "\tUse Random traffic pattern generator with packet injection rate equal to PIR (value between 0 and 1)."

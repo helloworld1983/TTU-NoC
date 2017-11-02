@@ -41,7 +41,7 @@ def gen_network_and_tb(program_argv, flow_control_type):
         + " -D " + str(program_argv['network_dime']) \
         + (" -Rand " + str(program_argv['rand']) if program_argv['rand'] != -1 else "") \
         + (" -VC " if program_argv['vc'] else "") \
-        + (" -NI " if program_argv['NI'] else "") \
+        + (" -NI "+str(program_argv['NI_depth']) if program_argv['NI'] else "") \
         + (" -BR " + str(program_argv['BR']) if program_argv['BR'] != -1 else "") \
         + (" -PS " + str(program_argv['PS'][0]) + " " + str(program_argv['PS'][1])) \
         + (" -sim " + str(program_argv['sim']) if program_argv['sim'] != -1 else "") \

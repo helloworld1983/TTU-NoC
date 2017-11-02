@@ -15,6 +15,7 @@ packet_size_min = 3
 packet_size_max = 8
 verbal = False
 add_NI = False
+NI_depth = 0
 vc = False
 
 if '-D'  in sys.argv[1:]:
@@ -47,6 +48,7 @@ if '-sim'  in sys.argv[1:]:
 
 if '-NI' in sys.argv[1:]:
     add_NI = True
+    NI_depth = int(sys.argv[1:][sys.argv[1:].index('-NI')+1])
 
 if '-PS'  in sys.argv[1:]:
   get_packet_size = True
@@ -246,7 +248,9 @@ if add_NI:
 
     for node_number in range(0, network_dime*network_dime):
       noc_file.write("NI_" + str(node_number) + ": NI \n")
-      noc_file.write("   generic map(current_address => " + str(node_number) + "\n")
+      noc_file.write("   generic map(current_address => " + str(node_number) + ",\n")
+      noc_file.write("               NI_depth => " + str(NI_depth) + ",\n")
+      noc_file.write("               NI_couter_size => " + str(int(ceil(log(NI_depth)/log(2)))) + "\n")
       noc_file.write("           ) \n")
       noc_file.write("   port map(clk => clk , reset => not_reset , enable => enable_" + str(node_number) + ", \n")
       noc_file.write("        write_byte_enable => write_byte_enable_" + str(node_number) + ", \n")
