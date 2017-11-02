@@ -16,7 +16,7 @@ use ieee.std_logic_unsigned.all;
 use IEEE.NUMERIC_STD.all;
 use ieee.std_logic_textio.all;
 use std.textio.all;
-use work.mlite_pack.all;
+
 use ieee.std_logic_misc.all;
 
 
@@ -24,7 +24,7 @@ entity NI is
    generic(current_address : integer := 10; 	-- the current node's address
            NI_depth : integer := 32;
            NI_couter_size: integer:= 5; -- should be set to log2 of NI_depth
-           reserved_address : std_logic_vector(29 downto 0) := "000000000000000001111111111111"; -- NI's memory mapped reserved 
+           reserved_address : std_logic_vector(29 downto 0) := "000000000000000001111111111111"; -- NI's memory mapped reserved
            flag_address : std_logic_vector(29 downto 0) :=     "000000000000000010000000000000";  -- reserved address for the flag register
            counter_address : std_logic_vector(29 downto 0) :=     "000000000000000010000000000001");  -- packet counter register address!
    port(clk               : in std_logic;
@@ -58,9 +58,10 @@ architecture logic of NI is
   signal valid_data_in, valid_data: std_logic;
 
   -- this old address is put here to make it compatible with Plasma processor!
-  signal old_address: std_logic_vector(31 downto 2); 
+  signal old_address: std_logic_vector(31 downto 2);
 
-  signal P2N_FIFO_read_pointer, P2N_FIFO_read_pointer_in,  P2N_FIFO_write_pointer, P2N_FIFO_write_pointer_in: std_logic_vector(6 downto 0);
+  signal P2N_FIFO_read_pointer, P2N_FIFO_read_pointer_in: std_logic_vector(NI_couter_size-1 downto 0);
+  signal P2N_FIFO_write_pointer, P2N_FIFO_write_pointer_in: std_logic_vector(NI_couter_size-1 downto 0);
   signal P2N_write_en: std_logic;
 
   type MEM is array (0 to NI_depth-1) of std_logic_vector(31 downto 0);
@@ -73,7 +74,7 @@ architecture logic of NI is
   signal packet_length_counter_in, packet_length_counter_out: std_logic_vector(13 downto 0);
   signal grant : std_logic;
 
-  type STATE_TYPE IS (IDLE, HEADER_FLIT, BODY_FLIT_1, BODY_FLIT, TAIL_FLIT, DIAGNOSIS_HEADER, DIAGNOSIS_BODY, DIAGNOSIS_BODY_1, DIAGNOSIS_TAIL);
+  type STATE_TYPE IS (IDLE, HEADER_FLIT, BODY_FLIT_1, BODY_FLIT, TAIL_FLIT);
   signal state, state_in   : STATE_TYPE := IDLE;
   signal FIFO_Data_out : std_logic_vector(31 downto 0);
   signal flag_register, flag_register_in : std_logic_vector(31 downto 0);
@@ -250,7 +251,6 @@ process(P2N_empty, state, credit_counter_out, packet_length_counter_out, packet_
 
     begin
         -- Some initializations
-    	  sent_info <= '0';
         TX <= (others => '0');
         grant<= '0';
         packet_length_counter_in <= packet_length_counter_out;
@@ -266,14 +266,9 @@ process(P2N_empty, state, credit_counter_out, packet_length_counter_out, packet_
 
             when HEADER_FLIT =>
                 if credit_counter_out /= "00" and P2N_empty = '0' then
-
-
                     grant <= '1';
-
                     TX <= "001" & std_logic_vector(to_unsigned(current_address, 14)) & FIFO_Data_out(13 downto 0) & XOR_REDUCE("001" & std_logic_vector(to_unsigned(current_address, 14)) & FIFO_Data_out(13 downto 0));
-
                     state_in <= BODY_FLIT_1;
-
                 else
                     state_in <= HEADER_FLIT;
                 end if;

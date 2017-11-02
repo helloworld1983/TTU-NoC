@@ -102,7 +102,7 @@ end COMPONENT;
    generic(current_address : integer := 10;   -- the current node's address
            NI_depth : integer := 32;
            NI_couter_size: integer:= 5; -- should be set to log2 of NI_depth
-           reserved_address : std_logic_vector(29 downto 0) := "000000000000000001111111111111"; -- NI's memory mapped reserved 
+           reserved_address : std_logic_vector(29 downto 0) := "000000000000000001111111111111"; -- NI's memory mapped reserved
            flag_address : std_logic_vector(29 downto 0) :=     "000000000000000010000000000000";  -- reserved address for the flag register
            counter_address : std_logic_vector(29 downto 0) :=     "000000000000000010000000000001");  -- packet counter register address!
    port(clk               : in std_logic;
@@ -128,5 +128,5 @@ end COMPONENT;
 
   );
 end component; --entity NI
-  
+
 end; --package body

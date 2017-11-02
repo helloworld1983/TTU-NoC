@@ -19,7 +19,6 @@ package TB_Package is
                       signal flag_address :            in std_logic_vector(29 downto 0) ; -- reserved address for the memory mapped I/O
                       signal counter_address :         in std_logic_vector(29 downto 0);
                       signal reconfiguration_address : in std_logic_vector(29 downto 0);  -- reserved address for reconfiguration register
-                      signal self_diagnosis_address :  in std_logic_vector(29 downto 0);
                       -- NI signals
                       signal enable:                   out std_logic;
                       signal write_byte_enable:        out std_logic_vector(3 downto 0);
@@ -70,7 +69,6 @@ package body TB_Package is
                       signal flag_address :            in std_logic_vector(29 downto 0) ; -- reserved address for the memory mapped I/O
                       signal counter_address :         in std_logic_vector(29 downto 0);
                       signal reconfiguration_address : in std_logic_vector(29 downto 0);  -- reserved address for reconfiguration register
-                      signal self_diagnosis_address :  in std_logic_vector(29 downto 0);
                       -- NI signals
                       signal enable:                   out std_logic;
                       signal write_byte_enable:        out std_logic_vector(3 downto 0);
@@ -89,12 +87,9 @@ package body TB_Package is
 
     variable RECEIVED_LINEVARIABLE : line;
     file RECEIVED_FILE : text;
-
-    variable DIAGNOSIS_LINEVARIABLE : line;
-    file DIAGNOSIS_FILE : text;
     -- receiving variables
     variable receive_source_node, receive_destination_node, receive_packet_id, receive_counter, receive_packet_length: integer;
-    variable diagnosis_source_node, diagnosis_destination_node, diagnosis_packet_id, diagnosis_counter, diagnosis_packet_length: integer;
+
 
     -- sending variables
     variable send_destination_node, send_counter, send_id_counter: integer:= 0;
@@ -104,13 +99,10 @@ package body TB_Package is
 
     variable  frame_starting_delay : integer:= 0;
     variable frame_counter: integer:= 0;
-    variable diagnosis : std_logic := '0';
-    variable diagnosis_data: std_logic_vector(24 downto 0);
     variable first_packet : boolean := True;
 
     begin
 
-    file_open(DIAGNOSIS_FILE,"diagnosis.txt",WRITE_MODE);
     file_open(RECEIVED_FILE,"received.txt",WRITE_MODE);
     file_open(SEND_FILE,"sent.txt",WRITE_MODE);
 
@@ -139,50 +131,9 @@ package body TB_Package is
 
       --flag register is organized like this:
       --       .-------------------------------------------------.
-      --       | N2P_empty | P2N_full | self_diagnosis_flag | ...|
+      --       | N2P_empty | P2N_full |                       ...|
       --       '-------------------------------------------------'
-
-      if data_read(29) = '1' then  -- self diagnosis data is ready!
-              -- read the received self diagnosis data status
-              address <= self_diagnosis_address;
-              write_byte_enable <= "0000";
-              wait until clk'event and clk ='0';
-              test <= data_read;
-
-              write(DIAGNOSIS_LINEVARIABLE, string'("Self diagnosis of SHMU Node:"));
-              writeline(DIAGNOSIS_FILE, DIAGNOSIS_LINEVARIABLE);
-
-              if data_read(0) = '1' then
-                  write(DIAGNOSIS_LINEVARIABLE, string'("Local input is link broken!"));
-                  writeline(DIAGNOSIS_FILE, DIAGNOSIS_LINEVARIABLE);
-                end if;
-
-                if data_read(1) = '1' then
-                  write(DIAGNOSIS_LINEVARIABLE, string'("South input is link broken!"));
-                  writeline(DIAGNOSIS_FILE, DIAGNOSIS_LINEVARIABLE);
-                end if;
-
-                if data_read(2) = '1' then
-                  write(DIAGNOSIS_LINEVARIABLE, string'("West input is link broken!"));
-                  writeline(DIAGNOSIS_FILE, DIAGNOSIS_LINEVARIABLE);
-                end if;
-
-                if data_read(3) = '1' then
-                  write(DIAGNOSIS_LINEVARIABLE, string'("East input is link broken!"));
-                  writeline(DIAGNOSIS_FILE, DIAGNOSIS_LINEVARIABLE);
-                end if;
-
-                if data_read(4) = '1' then
-                  write(DIAGNOSIS_LINEVARIABLE, string'("North input is link broken!"));
-                  writeline(DIAGNOSIS_FILE, DIAGNOSIS_LINEVARIABLE);
-                end if;
-
-              write(DIAGNOSIS_LINEVARIABLE, string'("--------------------------------"));
-              writeline(DIAGNOSIS_FILE, DIAGNOSIS_LINEVARIABLE);
-
-              wait until clk'event and clk ='0';
-
-      elsif data_read(31) = '0' then  -- N2P is not empty, can receive flit
+      if data_read(31) = '0' then  -- N2P is not empty, can receive flit
           -- read the received data status
           address <= counter_address;
           write_byte_enable <= "0000";
@@ -198,8 +149,6 @@ package body TB_Package is
               receive_destination_node := to_integer(unsigned(data_read(14 downto 1)));
               receive_source_node := to_integer(unsigned(data_read(28 downto 15)));
               receive_counter := 1;
-              diagnosis :=  '0';
-              diagnosis_data := (others => '0');
           end if;
 
           if  (data_read(DATA_WIDTH-1 downto DATA_WIDTH-3) = "010") then  -- got body flit
@@ -208,58 +157,16 @@ package body TB_Package is
                   receive_packet_id := to_integer(unsigned(data_read(14 downto 1)));
               end if;
               receive_counter := receive_counter+1;
-              if data_read(28 downto 13) =  "0100011001000100" then
-                  diagnosis :=  '1';
-                  diagnosis_data(11 downto 0) := data_read(12 downto 1);
-              end if;
+
           end if;
 
           if (data_read(DATA_WIDTH-1 downto DATA_WIDTH-3) = "100") then -- got tail flit
               receive_counter := receive_counter+1;
-              if diagnosis = '0' then
                 write(RECEIVED_LINEVARIABLE, "Packet received at " & time'image(now) & " From: " & integer'image(receive_source_node) & " to: " & integer'image(receive_destination_node) & " length: "& integer'image(receive_packet_length) & " actual length: "& integer'image(receive_counter)  & " id: "& integer'image(receive_packet_id));
                 writeline(RECEIVED_FILE, RECEIVED_LINEVARIABLE);
-              else
-                diagnosis_data(24 downto 12) := data_read(28 downto 16);
-
-                write(DIAGNOSIS_LINEVARIABLE, "Packet received at " & time'image(now) & " From: " & integer'image(receive_source_node) & " to: " & integer'image(receive_destination_node) & " length: "& integer'image(receive_packet_length) & " actual length: "& integer'image(receive_counter)  & " id: "& integer'image(receive_packet_id) & " diagnosis: " );
-                writeline(DIAGNOSIS_FILE, DIAGNOSIS_LINEVARIABLE);
-
-                write(DIAGNOSIS_LINEVARIABLE, to_bitvector(diagnosis_data));
-                writeline(DIAGNOSIS_FILE, DIAGNOSIS_LINEVARIABLE);
-
-                if diagnosis_data(0) = '1' then
-                  write(DIAGNOSIS_LINEVARIABLE, string'("Local input is link broken!"));
-                  writeline(DIAGNOSIS_FILE, DIAGNOSIS_LINEVARIABLE);
-                end if;
-
-                if diagnosis_data(1) = '1' then
-                  write(DIAGNOSIS_LINEVARIABLE, string'("South input is link broken!"));
-                  writeline(DIAGNOSIS_FILE, DIAGNOSIS_LINEVARIABLE);
-                end if;
-
-                if diagnosis_data(2) = '1' then
-                  write(DIAGNOSIS_LINEVARIABLE, string'("West input is link broken!"));
-                  writeline(DIAGNOSIS_FILE, DIAGNOSIS_LINEVARIABLE);
-                end if;
-
-                if diagnosis_data(3) = '1' then
-                  write(DIAGNOSIS_LINEVARIABLE, string'("East input is link broken!"));
-                  writeline(DIAGNOSIS_FILE, DIAGNOSIS_LINEVARIABLE);
-                end if;
-
-                if diagnosis_data(4) = '1' then
-                  write(DIAGNOSIS_LINEVARIABLE, string'("North input is link broken!"));
-                  writeline(DIAGNOSIS_FILE, DIAGNOSIS_LINEVARIABLE);
-                end if;
-                write(DIAGNOSIS_LINEVARIABLE, string'("--------------------------------"));
-                writeline(DIAGNOSIS_FILE, DIAGNOSIS_LINEVARIABLE);
-              end if;
           end if;
 
       elsif data_read(30) = '0' then -- P2N is not full, can send flit
-
-
           if frame_counter >= frame_starting_delay  then
 
               if state = Idle and now  < finish_time then
@@ -286,7 +193,7 @@ package body TB_Package is
                     -- this is the header flit
                     address <= reserved_address;
                     write_byte_enable <= "1111";
-                    data_write <= "0000" &  std_logic_vector(to_unsigned(0, 14)) & std_logic_vector(to_unsigned(send_destination_node, 14));
+                    data_write <= "0000" &  std_logic_vector(to_unsigned(current_address, 14)) & std_logic_vector(to_unsigned(send_destination_node, 14));
                     write(SEND_LINEVARIABLE, "Packet generated at " & time'image(now) & " From " & integer'image(current_address) & " to " & integer'image(send_destination_node) & " with length: "& integer'image(send_packet_length)  & " id: " & integer'image(send_id_counter));
                     writeline(SEND_FILE, SEND_LINEVARIABLE);
                   else
@@ -350,7 +257,6 @@ package body TB_Package is
     end loop;
     file_close(SEND_FILE);
     file_close(RECEIVED_FILE);
-    file_close(DIAGNOSIS_FILE);
   end NI_control;
 
 

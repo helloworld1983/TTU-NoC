@@ -46,13 +46,20 @@ def write_do_file(program_argv, net_file_name, net_tb_file_name, wave_do_file_na
     else:
         do_file.write("vcom \"" + TEST_DIR  \
                       + "/router_pack.vhd"+"\"\n")
-        List_of_files = file_lists.credit_based_files
+        if program_argv['NI']:
+            List_of_files = file_lists.credit_based_files_NI
+        else:
+            List_of_files = file_lists.credit_based_files
         for file in List_of_files:
             do_file.write(include_cmd(file) + " \"" + ROUTER_RTL_DIR +file+"\"\n")
 
         do_file.write("vcom \"" + ROUTER_RTL_DIR + "/Router_32_bit_credit_based.vhd\"\n")
 
-        do_file.write("vcom \"" + TEST_DIR \
+        if program_argv['NI']:
+            do_file.write("vcom \"" + TEST_DIR \
+                      + "/TB_Package_32_bit_" + CREDIT_BASED_SUFFIX + "_NI.vhd\"\n")
+        else:
+            do_file.write("vcom \"" + TEST_DIR \
                       + "/TB_Package_32_bit_" + CREDIT_BASED_SUFFIX + ".vhd\"\n")
 
     if program_argv['trace'] :
