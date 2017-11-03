@@ -108,7 +108,8 @@ else:
     f.write("number of processed packets:"+str(len(delay_list))+"\n")
     f.write("maximum packet latency:"+str(max(delay_list)/1000.0)+" ns"+"\n")
     f.write("minimmum packet latency:"+str(min(delay_list)/1000.0)+" ns"+"\n")
-    f.write("average packet latency:"+str("%.2f" % float(sum(delay_list)/(len(delay_list)*1000)))+" ns"+"\n")
+    avg_packet_latency = "%.2f" % float(sum(delay_list)/(len(delay_list)*1000))
+    f.write("average packet latency:"+str(avg_packet_latency)+" ns"+"\n")
 
     print "number of processed packets:", len(delay_list)
     print "maximum packet latency:", max(delay_list)/1000.0 , "ns"
@@ -118,5 +119,7 @@ else:
     Kb_per_second = bits_per_second/1024.0
     Mb_per_second = Kb_per_second/1024.0
     print "--------------"
-    print "average throughput:", "%.2f" % float(Mb_per_second), "Mb/s"
+    avg_throughput = "%.2f" % float(Mb_per_second)
+    print "average throughput:", avg_throughput, "Mb/s"
+    f.write("average throughput:"+str(avg_throughput)+" Mb/s"+"\n")
     f.close()
