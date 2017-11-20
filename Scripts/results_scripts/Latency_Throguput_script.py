@@ -1,6 +1,6 @@
 import os
 pir_list = [0.005, 0.01, 0.015, 0.02, 0.025, 0.03]
-noc_size_list = [2, 4, 8]
+noc_size_list = [16]
 packet_size_list = [4, 8, 16]
 clock_duration = 10.0 #ns
 NI_depth = 32 # this is the depth of the NI FIFO. for better results increase it to 128
