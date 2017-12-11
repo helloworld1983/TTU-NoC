@@ -31,8 +31,8 @@ class CreditBasedPackage():
             return 1
         if '-D' in arguments_list:
             self.network_dime = int(arguments_list[arguments_list.index('-D')+1])
-            if self.network_dime % 2 != 0:
-                raise ValueError("wrong network size. please choose powers of 2. for example 4!")
+            # if self.network_dime % 2 != 0:
+            #     raise ValueError("wrong network size. please choose powers of 2. for example 4!")
 
         if '-DW' in arguments_list:
             self.data_width = int(arguments_list[arguments_list.index('-DW')+1])

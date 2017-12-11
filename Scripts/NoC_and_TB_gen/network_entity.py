@@ -9,7 +9,7 @@ def generate_entity(noc_file, network_dime, vc):
     string_to_print = ""
     noc_file.write("entity network_"+str(network_dime)+"x"+str(network_dime)+" is\n")
 
-    noc_file.write(" generic (DATA_WIDTH: integer := 32; DATA_WIDTH_LV: integer := 11);\n")
+    noc_file.write(" generic (DATA_WIDTH: integer := 32; DATA_WIDTH_LV: integer := 11; Address_length: integer := 4);\n")
     noc_file.write("port (reset: in  std_logic; \n")
     noc_file.write("\tclk: in  std_logic; \n")
     noc_file.write("\t--------------\n")

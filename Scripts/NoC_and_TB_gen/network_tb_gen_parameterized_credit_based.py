@@ -91,8 +91,8 @@ noc_file.write("use IEEE.STD_LOGIC_UNSIGNED.ALL;\n")
 noc_file.write("use work.TB_Package.all;\n\n")
 noc_file.write("use work.router_pack.all;\n\n")
 noc_file.write("USE ieee.numeric_std.ALL; \n")
-noc_file.write("use IEEE.math_real.\"ceil\";\n")
-noc_file.write("use IEEE.math_real.\"log2\";\n\n")
+noc_file.write("-- use IEEE.math_real.\"ceil\";\n")
+noc_file.write("-- use IEEE.math_real.\"log2\";\n\n")
 
 noc_file.write("entity tb_network_"+str(network_dime)+"x"+str(network_dime)+" is\n")
 
@@ -104,12 +104,26 @@ noc_file.write("architecture behavior of tb_network_"+str(network_dime)+"x"+str(
 
 noc_file.write("-- Declaring network component\n")
 
+noc_file.write("function log2( i : integer) return integer is \n")
+noc_file.write("    variable temp    : integer := i; \n")
+noc_file.write("    variable ret_val : integer := 1; --log2 of 0 should equal 1 because you still need 1 bit to represent 0 \n")
+noc_file.write("  begin                  \n")
+noc_file.write("    while temp > 1 loop \n")
+noc_file.write("      ret_val := ret_val + 1; \n")
+noc_file.write("      temp    := temp / 2;      \n")
+noc_file.write("    end loop; \n")
+noc_file.write("     \n")
+noc_file.write("    return ret_val; \n")
+noc_file.write("  end function; \n")
 
 
 string_to_print = ""
 noc_file.write("component network_"+str(network_dime)+"x"+str(network_dime)+" is\n")
 
-noc_file.write(" generic (DATA_WIDTH: integer := 32; DATA_WIDTH_LV: integer := 11);\n")
+
+
+
+noc_file.write(" generic (DATA_WIDTH: integer := 32; DATA_WIDTH_LV: integer := 11; Address_length: integer := 4);\n")
 noc_file.write("port (reset: in  std_logic; \n")
 noc_file.write("\tclk: in  std_logic; \n")
 
@@ -195,6 +209,8 @@ if add_NI:
 
 noc_file.write("\t--------------\n")
 noc_file.write("\tconstant clk_period : time := 1 ns;\n")
+
+noc_file.write("\tconstant NoC_size : integer := "+str(network_dime)+";\n")
 noc_file.write("\tsignal reset, not_reset, clk: std_logic :='0';\n")
 
 noc_file.write("\n")
@@ -210,6 +226,7 @@ noc_file.write("        wait for clk_period/2; \n")
 noc_file.write("   end process;\n")
 noc_file.write("\n")
 noc_file.write("reset <= '1' after 1 ns;\n")
+noc_file.write("\n")
 
 noc_file.write("-- instantiating the network\n")
 
@@ -226,7 +243,7 @@ for i in range(0, network_dime**2):
 
 
 string_to_print = ""
-string_to_print += "NoC: network_"+str(network_dime)+"x"+str(network_dime)+" generic map (DATA_WIDTH  => "+str(data_width)+", DATA_WIDTH_LV => 11)\n"
+string_to_print += "NoC: network_"+str(network_dime)+"x"+str(network_dime)+" generic map (DATA_WIDTH  => "+str(data_width)+", DATA_WIDTH_LV => 11, Address_length => log2(" +str(network_dime)+"* "+str(network_dime)+" - 1))\n"
 string_to_print += "port map (reset, clk, \n"
 
 for i in range(network_dime**2):
@@ -323,7 +340,7 @@ else:
         if vc:
             noc_file.write("get_packet("+str(data_width)+", 5, "+str(i)+", clk, credit_in_L_"+str(i)+", valid_out_L_"+str(i)+", credit_in_vc_L_"+str(i)+", valid_out_vc_L_"+str(i)+", TX_L_"+str(i)+");\n")
         else:
-            noc_file.write("get_packet("+str(data_width)+", 5, "+str(i)+", clk, credit_in_L_"+str(i)+", valid_out_L_"+str(i)+",  TX_L_"+str(i)+");\n")
+            noc_file.write("get_packet("+str(network_dime)+", "+str(data_width)+", 5, "+str(i)+", clk, credit_in_L_"+str(i)+", valid_out_L_"+str(i)+",  TX_L_"+str(i)+");\n")
 
 noc_file.write("\n\n")
 

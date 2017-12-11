@@ -9,7 +9,10 @@ use IEEE.NUMERIC_STD.all;
  use ieee.std_logic_misc.all;
 
 package TB_Package is
-  function Header_gen(source, destination: integer ) return std_logic_vector ;
+
+  --function log2(i : integer) return integer;
+
+  function Header_gen(network_size, source, destination: integer ) return std_logic_vector ;
 
   function Body_1_gen(Packet_length, packet_id: integer ) return std_logic_vector ;
   function Body_gen(Data: integer ) return std_logic_vector ;
@@ -27,22 +30,33 @@ package TB_Package is
                       finish_time: in time; signal clk: in std_logic;
                       signal credit_counter_in: in std_logic_vector(1 downto 0); signal valid_out: out std_logic;
                       signal port_in: out std_logic_vector);
-  procedure get_packet(DATA_WIDTH, initial_delay, Node_ID: in integer; signal clk: in std_logic;
+  procedure get_packet(network_size, DATA_WIDTH, initial_delay, Node_ID: in integer; signal clk: in std_logic;
                      signal credit_out: out std_logic; signal valid_in: in std_logic; signal port_in: in std_logic_vector);
 end TB_Package;
 
 package body TB_Package is
+
   constant Header_type : std_logic_vector := "001";
   constant Body_type : std_logic_vector := "010";
   constant Tail_type : std_logic_vector := "100";
 
-  function Header_gen(source, destination: integer)
+  function Header_gen(network_size, source, destination: integer)
               return std_logic_vector is
     	variable Header_flit: std_logic_vector (31 downto 0);
+      variable source_x, source_y, destination_x, destination_y: integer;
+
     	begin
-    	Header_flit := Header_type &  std_logic_vector(to_unsigned(source, 14)) &
-                     std_logic_vector(to_unsigned(destination, 14))  & XOR_REDUCE(Header_type &  std_logic_vector(to_unsigned(source, 14)) &
-                     std_logic_vector(to_unsigned(destination, 14)));
+
+      source_x := source mod network_size;
+      source_y := source / network_size;
+      destination_x := destination mod network_size;
+      destination_y := destination / network_size;
+
+      Header_flit := Header_type &  std_logic_vector(to_unsigned(source_y,7)) & std_logic_vector(to_unsigned(source_x,7)) &
+                     std_logic_vector(to_unsigned(destination_y,7)) & std_logic_vector(to_unsigned(destination_x,7)) &
+                     XOR_REDUCE(Header_type &  std_logic_vector(to_unsigned(source_y,7)) & std_logic_vector(to_unsigned(source_x,7)) &
+                     std_logic_vector(to_unsigned(destination_y,7)) & std_logic_vector(to_unsigned(destination_x,7)));
+
     return Header_flit;
   end Header_gen;
 
@@ -162,7 +176,7 @@ package body TB_Package is
       write(LINEVARIABLE, "Packet generated at " & time'image(now) & " From " & integer'image(source) & " to " & integer'image(destination_id) & " with length: " & integer'image(Packet_length) & " id: " & integer'image(id_counter));
       writeline(VEC_FILE, LINEVARIABLE);
       wait until clk'event and clk ='0'; -- On negative edge of clk (for syncing purposes)
-      port_in <= Header_gen(source, destination_id); -- Generating the header flit of the packet (All packets have a header flit)!
+      port_in <= Header_gen(network_size, source, destination_id); -- Generating the header flit of the packet (All packets have a header flit)!
       valid_out <= '1';
       wait until clk'event and clk ='0';
 
@@ -279,7 +293,7 @@ procedure gen_bit_reversed_packet(network_size, frame_length, source, initial_de
       write(LINEVARIABLE, "Packet generated at " & time'image(now) & " From " & integer'image(source) & " to " & integer'image(destination_id) & " with length: " & integer'image(Packet_length) & " id: " & integer'image(id_counter));
       writeline(VEC_FILE, LINEVARIABLE);
       wait until clk'event and clk ='0';
-      port_in <= Header_gen(source, destination_id); -- Generating the header flit of the packet (All packets have a header flit)!
+      port_in <= Header_gen(network_size, source, destination_id); -- Generating the header flit of the packet (All packets have a header flit)!
       valid_out <= '1';
       wait until clk'event and clk ='0';
 
@@ -327,10 +341,10 @@ procedure gen_bit_reversed_packet(network_size, frame_length, source, initial_de
   end gen_bit_reversed_packet;
 
 
-  procedure get_packet(DATA_WIDTH, initial_delay, Node_ID: in integer; signal clk: in std_logic;
+  procedure get_packet(network_size, DATA_WIDTH, initial_delay, Node_ID: in integer; signal clk: in std_logic;
                        signal credit_out: out std_logic; signal valid_in: in std_logic; signal port_in: in std_logic_vector) is
   -- initial_delay: waits for this number of clock cycles before sending the packet!
-    variable source_node, destination_node, P_length, packet_id, counter: integer;
+    variable source_node_x, source_node_y, destination_node_x, destination_node_y, source_node, destination_node, P_length, packet_id, counter: integer;
     variable LINEVARIABLE : line;
      file VEC_FILE : text is out "received.txt";
      file DIAGNOSIS_FILE : text is out "DIAGNOSIS.txt";
@@ -347,8 +361,14 @@ procedure gen_bit_reversed_packet(network_size, frame_length, source, initial_de
               if (port_in(DATA_WIDTH-1 downto DATA_WIDTH-3) = "001") then
                 counter := 1;
                 DIAGNOSIS := '0';
-                source_node := to_integer(unsigned(port_in(28 downto 15)));
-                destination_node := to_integer(unsigned(port_in(14 downto 1)));
+
+                source_node_y := to_integer(unsigned(port_in(28 downto 22)));
+                source_node_x := to_integer(unsigned(port_in(21 downto 15)));
+                destination_node_y := to_integer(unsigned(port_in(14 downto 8)));
+                destination_node_x := to_integer(unsigned(port_in(7 downto 1)));
+
+                source_node := (source_node_y * network_size) + source_node_x;
+                destination_node := (destination_node_y * network_size) + destination_node_x;
 
             end if;
             if  (port_in(DATA_WIDTH-1 downto DATA_WIDTH-3) = "010")   then
@@ -368,7 +388,7 @@ procedure gen_bit_reversed_packet(network_size, frame_length, source, initial_de
                 counter := counter+1;
               report "Node: " & integer'image(Node_ID) & "    Packet received at " & time'image(now) & " From " & integer'image(source_node) & " to " & integer'image(destination_node) & " with length: "& integer'image(P_length) & " counter: "& integer'image(counter);
               assert (P_length=counter) report "wrong packet size" severity warning;
-              assert (Node_ID=destination_node) report "wrong packet destination " severity failure;
+              assert (Node_ID=destination_node) report "wrong packet destination " severity warning;
               if DIAGNOSIS = '1' then
                 DIAGNOSIS_vector(12) := port_in(28);
                 write(LINEVARIABLE, "Packet received at " & time'image(now) & " From: " & integer'image(source_node) & " to: " & integer'image(destination_node) & " length: "& integer'image(P_length) & " actual length: "& integer'image(counter)  & " id: "& integer'image(packet_id));

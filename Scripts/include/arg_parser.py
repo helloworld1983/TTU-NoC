@@ -32,8 +32,8 @@ def arg_parser(argv, program_argv, logging):
         program_argv['network_dime'] = int(argv[argv.index('-D')+1])
         if program_argv['network_dime'] < 2:
             raise ValueError("You cannot build a network with " + str(program_argv['network_dime']) + " node(s)!")
-        if program_argv['network_dime'] % 2 != 0:
-            raise ValueError("Wrong network size. Please choose multiples of 2. For example 4!")
+        # if program_argv['network_dime'] % 2 != 0:
+        #     raise ValueError("Wrong network size. Please choose multiples of 2. For example 4!")
 
     if '-lat' in argv[1:]:
         program_argv['lat'] = True

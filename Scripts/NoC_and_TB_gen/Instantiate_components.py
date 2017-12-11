@@ -15,7 +15,8 @@ def instantiate_routers(noc_file, network_dime, vc):
         noc_file.write("R_"+str(i)+": router_credit_based generic map (DATA_WIDTH  => DATA_WIDTH, ")
 
         noc_file.write("current_address=>"+str(i)+", " +
-                       "Cx_rst => "+str(cx_rst_calculator(i, network_dime))+",Rxy_rst => 60, NoC_size=>"+str(int(math.log(network_dime*network_dime, 2)))+")\n")
+                       # "Cx_rst => "+str(cx_rst_calculator(i, network_dime))+",Rxy_rst => 60, NoC_size=>"+str(int(math.log(network_dime*network_dime, 2)))+")\n")
+                       "Cx_rst => "+str(cx_rst_calculator(i, network_dime))+",Rxy_rst => 60, Address_length => Address_length, NoC_size=>"+str(network_dime)+")\n")
         noc_file.write("PORT MAP (reset, clk, \n")
         noc_file.write("\tRX_N_"+str(i)+", RX_E_"+str(i)+", RX_W_"+str(i)+", RX_S_"+str(i)+", RX_L_"+str(i)+",\n")
         noc_file.write("\tcredit_in_N_"+str(i)+", credit_in_E_"+str(i)+", credit_in_W_"+str(i) +

@@ -64,24 +64,23 @@ package router_pack is
             );
 end COMPONENT;
 
-  COMPONENT LBDR is
+COMPONENT LBDR is
     generic (
-        cur_addr_rst: integer := 0;
+        cur_addr_rst: integer := 8;
         Rxy_rst: integer := 8;
         Cx_rst: integer := 8;
         NoC_size: integer := 4
     );
     port (  reset: in  std_logic;
             clk: in  std_logic;
-
-
             empty: in  std_logic;
             flit_type: in std_logic_vector(2 downto 0);
-            dst_addr: in std_logic_vector(NoC_size-1 downto 0);
-          grant_N, grant_E, grant_W, grant_S, grant_L: in std_logic;
+            cur_addr_y, cur_addr_x: in std_logic_vector(6 downto 0);
+            dst_addr_y, dst_addr_x: in std_logic_vector(6 downto 0);
+            grant_N, grant_E, grant_W, grant_S, grant_L: in std_logic;
             Req_N, Req_E, Req_W, Req_S, Req_L:out std_logic
             );
-  end COMPONENT;
+end COMPONENT;
 
   COMPONENT XBAR is
     generic (

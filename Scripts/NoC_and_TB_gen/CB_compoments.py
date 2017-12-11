@@ -10,6 +10,7 @@ def declare_components(noc_file, vc):
     noc_file.write("        current_address : integer := 0;\n")
     noc_file.write("        Rxy_rst : integer := 60;\n")
     noc_file.write("        Cx_rst : integer := 10;\n")
+    noc_file.write("        Address_length : integer := 4;\n")
     noc_file.write("        NoC_size: integer := 4\n")
     noc_file.write("    );\n")
     noc_file.write("    port (\n")
