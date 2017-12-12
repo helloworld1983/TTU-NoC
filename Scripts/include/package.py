@@ -19,8 +19,8 @@ TRACE_DIR = SIMUL_DIR+ "/traces"
 
 # Subfolders
 SCRIPTS_DIR = PROJECT_ROOT + "/Scripts"
-ROUTER_RTL_DIR = PROJECT_ROOT+"/RTL/base_line/"
-ROUTER_VC_RTL_DIR = PROJECT_ROOT+"/RTL/virtual_channel/"
+ROUTER_RTL_DIR = PROJECT_ROOT+"/RTL/base_line"
+ROUTER_VC_RTL_DIR = PROJECT_ROOT+"/RTL/virtual_channel"
 TEST_DIR = PROJECT_ROOT + "/Packages"
 
 
@@ -38,17 +38,18 @@ LATENCY_CALCULATION_PATH = "calculate_latency.py"
 
 # Default simulation configuration
 program_argv = {
-        'network_dime':     4,
-        'vc':              -1,
-        'rand':            -1,
-        'BR':              -1,
-        'PS':              [3,8],
-        'sim':             -1,
-        'end':             -1,
-        'lat':             False,
-        'debug':           False,
-        'trace':           False,
-        'command-line':    False,
+        'network_dime_x':     4,
+        'network_dime_y':     4,
+        'vc':                -1,
+        'rand':              -1,
+        'BR':                -1,
+        'PS':                [3,8],
+        'sim':               -1,
+        'end':               -1,
+        'lat':               False,
+        'debug':             False,
+        'trace':             False,
+        'command-line':      False,
     }
 
 # Debug mode is off by default

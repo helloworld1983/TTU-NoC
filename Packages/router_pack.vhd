@@ -68,8 +68,7 @@ COMPONENT LBDR is
     generic (
         cur_addr_rst: integer := 8;
         Rxy_rst: integer := 8;
-        Cx_rst: integer := 8;
-        NoC_size: integer := 4
+        Cx_rst: integer := 8
     );
     port (  reset: in  std_logic;
             clk: in  std_logic;

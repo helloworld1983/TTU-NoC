@@ -41,26 +41,22 @@ def write_do_file(program_argv, net_file_name, net_tb_file_name, wave_do_file_na
             do_file.write(include_cmd(file) + " \"" + ROUTER_VC_RTL_DIR +file+"\"\n")
         do_file.write("vcom \"" + ROUTER_VC_RTL_DIR + "/Router_32_bit_credit_based.vhd\"\n")
 
-        do_file.write("vcom \"" + TEST_DIR \
-                      + "/TB_Package_32_bit_" + CREDIT_BASED_SUFFIX + "_vc.vhd\"\n")
+        do_file.write("vcom \"" + TEST_DIR + "/TB_Package_32_bit_" + CREDIT_BASED_SUFFIX + "_vc.vhd\"\n")
     else:
-        do_file.write("vcom \"" + TEST_DIR  \
-                      + "/router_pack.vhd"+"\"\n")
+        do_file.write("vcom \"" + TEST_DIR + "/router_pack.vhd"+"\"\n")
         if program_argv['NI']:
             List_of_files = file_lists.credit_based_files_NI
         else:
             List_of_files = file_lists.credit_based_files
         for file in List_of_files:
-            do_file.write(include_cmd(file) + " \"" + ROUTER_RTL_DIR +file+"\"\n")
+            do_file.write(include_cmd(file) + " \"" + ROUTER_RTL_DIR+"/" +file+"\"\n")
 
         do_file.write("vcom \"" + ROUTER_RTL_DIR + "/Router_32_bit_credit_based.vhd\"\n")
 
         if program_argv['NI']:
-            do_file.write("vcom \"" + TEST_DIR \
-                      + "/TB_Package_32_bit_" + CREDIT_BASED_SUFFIX + "_NI.vhd\"\n")
+            do_file.write("vcom \"" + TEST_DIR + "/TB_Package_32_bit_" + CREDIT_BASED_SUFFIX + "_NI.vhd\"\n")
         else:
-            do_file.write("vcom \"" + TEST_DIR \
-                      + "/TB_Package_32_bit_" + CREDIT_BASED_SUFFIX + ".vhd\"\n")
+            do_file.write("vcom \"" + TEST_DIR + "/TB_Package_32_bit_" + CREDIT_BASED_SUFFIX + ".vhd\"\n")
 
     if program_argv['trace'] :
         do_file.write("vcom \"" + ROUTER_RTL_DIR + "flit_tracker.vhd\"\n")
@@ -72,8 +68,7 @@ def write_do_file(program_argv, net_file_name, net_tb_file_name, wave_do_file_na
     #### Simulation control ####
 
     do_file.write("# Start the simulation\n")
-    do_file.write("vsim work.tb_network_" \
-        + str(program_argv['network_dime']) + "x" + str(program_argv['network_dime']) + "\n\n")
+    do_file.write("vsim work.tb_network_" + str(program_argv['network_dime_x']) + "x" + str(program_argv['network_dime_y']) + "\n\n")
 
     do_file.write("# Draw waves\n")
     do_file.write("do " + wave_do_file_name + "\n")
