@@ -12,9 +12,10 @@ class CreditBasedPackage():
     """
 
     def __init__(self):
-        self.network_dime = None
+        # self.network_dime = None
         self.data_width = 32
-        self.network_dime = 4
+        self.network_dime_x = 4
+        self.network_dime_y = 4
         self.add_tracker = False
         self.vc = False
 
@@ -30,9 +31,8 @@ class CreditBasedPackage():
                   "injectors into ../output.vhd"
             return 1
         if '-D' in arguments_list:
-            self.network_dime = int(arguments_list[arguments_list.index('-D')+1])
-            if self.network_dime % 2 != 0:
-                raise ValueError("wrong network size. please choose powers of 2. for example 4!")
+            self.network_dime_x = int(arguments_list[arguments_list.index('-D')+1])
+            self.network_dime_y = int(arguments_list[arguments_list.index('-D')+2])
 
         if '-DW' in arguments_list:
             self.data_width = int(arguments_list[arguments_list.index('-DW')+1])
@@ -57,5 +57,5 @@ class CreditBasedPackage():
             if ".vhd" not in file_path:
                 raise ValueError("wrong file extension. only vhdl files are accepted!")
         else:
-            file_path = file_name+'_'+str(self.network_dime)+"x"+str(self.network_dime)+'.vhd'
+            file_path = file_name+'_'+str(self.network_dime_x)+"x"+str(self.network_dime_y)+'.vhd'
         return file_path

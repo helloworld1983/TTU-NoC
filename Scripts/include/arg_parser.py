@@ -20,7 +20,8 @@ def arg_parser(argv, program_argv, logging):
         logging.info("exiting the program!")
         sys.exit()
 
-    program_argv['network_dime'] = 4
+    program_argv['network_dime_x'] = 4
+    program_argv['network_dime_y'] = 4
     program_argv['vc'] = False
     program_argv['NI'] = False
     program_argv['NI_depth'] = 0
@@ -29,11 +30,10 @@ def arg_parser(argv, program_argv, logging):
     program_argv['trace'] = False
 
     if '-D'	in argv[1:]:
-        program_argv['network_dime'] = int(argv[argv.index('-D')+1])
-        if program_argv['network_dime'] < 2:
-            raise ValueError("You cannot build a network with " + str(program_argv['network_dime']) + " node(s)!")
-        if program_argv['network_dime'] % 2 != 0:
-            raise ValueError("Wrong network size. Please choose multiples of 2. For example 4!")
+        program_argv['network_dime_x'] = int(argv[argv.index('-D')+1])
+        program_argv['network_dime_y'] = int(argv[argv.index('-D')+2])
+        if program_argv['network_dime_x'] == 1 and program_argv['network_dime_y'] == 1:
+            raise ValueError("You cannot build a network with 1 node!")
 
     if '-lat' in argv[1:]:
         program_argv['lat'] = True

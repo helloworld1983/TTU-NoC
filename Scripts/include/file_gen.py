@@ -11,14 +11,14 @@ def gen_network_and_tb(program_argv, flow_control_type):
 
     # Generated network file name
     net_file_name = "network_" \
-        + str(program_argv['network_dime']) + "x" + str(program_argv['network_dime']) \
+        + str(program_argv['network_dime_x']) + "x" + str(program_argv['network_dime_y']) \
         + "_credit_based" \
         + ".vhd"
 
     # Command to run for network generation
     net_gen_command = "python " + SCRIPTS_DIR + "/NoC_and_TB_gen"  \
         + "/" + NET_GEN_SCRIPT + "_" + flow_control_type + ".py" \
-        + " -D " + str(program_argv['network_dime']) \
+        + " -D " + str(program_argv['network_dime_x']) + " " + str(program_argv['network_dime_y']) \
         + (" -VC" if program_argv['vc'] else "") \
         + " -o " + SIMUL_DIR + "/" + net_file_name
 
@@ -30,7 +30,7 @@ def gen_network_and_tb(program_argv, flow_control_type):
         sys.exit(1)
 
     # Generate testbench
-    net_tb_file_name = "network_" + str(program_argv['network_dime']) + "x" + str(program_argv['network_dime']) \
+    net_tb_file_name = "network_" + str(program_argv['network_dime_x']) + "x" + str(program_argv['network_dime_y']) \
         + ("_Rand" if program_argv['rand'] != -1 else "") \
         + ("_BR" if program_argv['BR'] != -1 else "") \
         + "_credit_based" \
@@ -38,7 +38,7 @@ def gen_network_and_tb(program_argv, flow_control_type):
 
     net_tb_gen_command = "python " + SCRIPTS_DIR + "/NoC_and_TB_gen" \
         + "/" + NET_TB_GEN_SCRIPT + "_" + flow_control_type + ".py" \
-        + " -D " + str(program_argv['network_dime']) \
+        + " -D " + str(program_argv['network_dime_x']) + " " + str(program_argv['network_dime_y']) \
         + (" -Rand " + str(program_argv['rand']) if program_argv['rand'] != -1 else "") \
         + (" -VC " if program_argv['vc'] else "") \
         + (" -NI "+str(program_argv['NI_depth']) if program_argv['NI'] else "") \
@@ -63,12 +63,12 @@ def gen_wave_do(program_argv, flow_control_type):
     by calling the related script
     """
     wave_do_file_name = "wave_" \
-    + (str(program_argv['network_dime']) + "x" + str(program_argv['network_dime'])) \
+    + (str(program_argv['network_dime_x']) + "x" + str(program_argv['network_dime_y'])) \
     + (".do")
 
     wave_do_gen_command = "python " + SCRIPTS_DIR + "/NoC_and_TB_gen" +  "/" \
         + WAVE_DO_GEN_SCRIPT + "_" + flow_control_type + ".py" \
-        + (" -D " + str(program_argv['network_dime'])) \
+        + (" -D " + str(program_argv['network_dime_x']) + " " + str(program_argv['network_dime_y'])) \
         + (" -o " + SIMUL_DIR + "/" + wave_do_file_name)
 
 
