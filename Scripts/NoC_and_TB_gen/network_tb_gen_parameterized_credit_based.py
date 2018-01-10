@@ -298,7 +298,7 @@ if add_NI:
         random_end = random.randint(random_start, 200)
 
       # NI_control needs fixing !!!
-      noc_file.write("NI_control("+str(network_dime_x)+", "+str(frame_size)+", "+str(node_number)+", "+str(random_start)+", " +str(packet_size_min)+", " +str(packet_size_max)+", "+str(random_end)+" ns, clk,\n")
+      noc_file.write("NI_control("+str(network_dime_x)+","+str(network_dime_y)+", "+str(frame_size)+", "+str(node_number)+", "+str(random_start)+", " +str(packet_size_min)+", " +str(packet_size_max)+", "+str(random_end)+" ns, clk,\n")
       noc_file.write("           -- NI configuration\n")
       noc_file.write("           reserved_address, flag_address, counter_address, reconfiguration_address,\n")
       noc_file.write("           -- NI signals\n")
@@ -330,7 +330,7 @@ else:
                               str(random_end)+" ns, clk, credit_counter_out_"+str(i)+", valid_in_L_"+str(i)+", RX_L_"+str(i)+");\n")
         # Bit-Reversal traffic in TB_Package file for both normal and VC needs to be fixed !!!
         elif bit_reversal:
-            # Package file for VC needs to be fixed !!!          
+            # Package file for VC needs to be fixed !!!
             if vc:
                 noc_file.write("gen_bit_reversed_packet("+str(network_dime_x)+", "+str(network_dime_y)+", "+str(frame_size)+", "+str(i)+", "+str(random_start)+", " +str(packet_size_min)+", " +str(packet_size_max)+", " +
                         str(random_end)+" ns, clk, credit_counter_out_"+str(i)+", valid_in_L_"+str(i)+", credit_counter_out_vc_"+str(i)+", valid_in_vc_L_"+str(i)+", RX_L_"+str(i)+");\n")
@@ -348,7 +348,7 @@ else:
         # Package file for VC needs to be fixed !!!
         if vc:
             noc_file.write("get_packet("+str(network_dime_x)+", "+str(data_width)+", 5, "+str(i)+", clk, credit_in_L_"+str(i)+", valid_out_L_"+str(i)+", credit_in_vc_L_"+str(i)+", valid_out_vc_L_"+str(i)+", TX_L_"+str(i)+");\n")
-        
+
         else:
             noc_file.write("get_packet("+str(network_dime_x)+", "+str(data_width)+", 5, "+str(i)+", clk, credit_in_L_"+str(i)+", valid_out_L_"+str(i)+",  TX_L_"+str(i)+");\n")
 

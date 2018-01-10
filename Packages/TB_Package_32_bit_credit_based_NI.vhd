@@ -9,9 +9,9 @@ use IEEE.NUMERIC_STD.all;
  use ieee.std_logic_misc.all;
 
 package TB_Package is
-  function CX_GEN(current_address, network_size : integer) return integer;
+  function CX_GEN(current_address, network_x, network_y : integer) return integer;
 
-   procedure NI_control(network_size, frame_length, current_address, initial_delay, min_packet_size, max_packet_size: in integer;
+   procedure NI_control(network_x, network_y, frame_length, current_address, initial_delay, min_packet_size, max_packet_size: in integer;
                       finish_time: in time;
                       signal clk:                      in std_logic;
                       -- NI configuration
@@ -34,19 +34,19 @@ package body TB_Package is
   constant Body_type : std_logic_vector := "010";
   constant Tail_type : std_logic_vector := "100";
 
-  function CX_GEN(current_address, network_size : integer) return integer is
+  function CX_GEN(current_address, network_x, network_y: integer) return integer is
     variable X, Y : integer := 0;
     variable CN, CE, CW, CS : std_logic := '0';
     variable CX : std_logic_vector(3 downto 0);
   begin
-    X :=  current_address mod  network_size;
-    Y :=  current_address / network_size;
+    X :=  current_address mod  network_x;
+    Y :=  current_address / network_x;
 
     if X /= 0 then
       CW := '1';
     end if;
 
-    if X /= network_size-1 then
+    if X /= network_x-1 then
       CE := '1';
     end if;
 
@@ -54,14 +54,14 @@ package body TB_Package is
       CN := '1';
     end if;
 
-    if Y /= network_size-1 then
+    if Y /= network_y-1 then
      CS := '1';
     end if;
    CX := CS&CW&CE&CN;
    return to_integer(unsigned(CX));
   end CX_GEN;
 
-  procedure NI_control(network_size, frame_length, current_address, initial_delay, min_packet_size, max_packet_size: in integer;
+  procedure NI_control(network_x, network_y, frame_length, current_address, initial_delay, min_packet_size, max_packet_size: in integer;
                       finish_time: in time;
                       signal clk:                      in std_logic;
                       -- NI configuration
@@ -117,7 +117,7 @@ package body TB_Package is
     wait until clk'event and clk ='0';
     write_byte_enable <= "1111";
 
-    data_write <= "00000000000000000000" & std_logic_vector(to_unsigned(CX_GEN(current_address, network_size), 4)) & std_logic_vector(to_unsigned(60, 8));
+    data_write <= "00000000000000000000" & std_logic_vector(to_unsigned(CX_GEN(current_address, network_x, network_y), 4)) & std_logic_vector(to_unsigned(60, 8));
 
     wait until clk'event and clk ='0';
     write_byte_enable <= "0000";
@@ -146,8 +146,8 @@ package body TB_Package is
           wait until clk'event and clk ='0';
 
           if (data_read(DATA_WIDTH-1 downto DATA_WIDTH-3) = "001") then -- got header flit
-              receive_destination_node := to_integer(unsigned(data_read(14 downto 1)));
-              receive_source_node := to_integer(unsigned(data_read(28 downto 15)));
+              receive_destination_node := to_integer(unsigned(data_read(14 downto 8)))* network_x+to_integer(unsigned(data_read(7 downto 1)));
+              receive_source_node :=to_integer(unsigned(data_read(21 downto 15)))* network_x+to_integer(unsigned(data_read(21 downto 15)));
               receive_counter := 1;
           end if;
 
@@ -176,10 +176,10 @@ package body TB_Package is
                     send_counter := send_counter+1;
                     -- generating the destination address
                     uniform(seed1, seed2, rand);
-                    send_destination_node := integer(rand*real((network_size**2)-1));
+                    send_destination_node := integer(rand*real((network_x*network_y)-1));
                     while (send_destination_node = current_address) loop
                         uniform(seed1, seed2, rand);
-                        send_destination_node := integer(rand*real((network_size**2)-1));
+                        send_destination_node := integer(rand*real((network_x*network_y)-1));
                     end loop;
                     --generating the packet length
                     uniform(seed1, seed2, rand);
@@ -193,7 +193,7 @@ package body TB_Package is
                     -- this is the header flit
                     address <= reserved_address;
                     write_byte_enable <= "1111";
-                    data_write <= "0000" &  std_logic_vector(to_unsigned(current_address, 14)) & std_logic_vector(to_unsigned(send_destination_node, 14));
+                    data_write <= "0000" &  std_logic_vector(to_unsigned(current_address/network_x, 7)) & std_logic_vector(to_unsigned(current_address mod network_x, 7)) & std_logic_vector(to_unsigned(send_destination_node/network_x, 7)) & std_logic_vector(to_unsigned(send_destination_node mod network_x, 7));
                     write(SEND_LINEVARIABLE, "Packet generated at " & time'image(now) & " From " & integer'image(current_address) & " to " & integer'image(send_destination_node) & " with length: "& integer'image(send_packet_length)  & " id: " & integer'image(send_id_counter));
                     writeline(SEND_FILE, SEND_LINEVARIABLE);
                   else
