@@ -2,6 +2,9 @@
 
 library ieee;
 use ieee.std_logic_1164.all;
+use IEEE.STD_LOGIC_ARITH.ALL;
+use IEEE.STD_LOGIC_UNSIGNED.ALL;
+USE ieee.numeric_std.ALL;
 use work.router_pack.all;
 
 
@@ -11,7 +14,7 @@ entity router_credit_based is
         current_address : integer := 0;
         Rxy_rst  : integer := 10;
         Cx_rst : integer := 10;
-        NoC_size: integer := 4
+        NoC_size_x: integer := 4
     );
     port (
     reset, clk: in std_logic;
@@ -69,7 +72,9 @@ architecture behavior of router_credit_based is
 	signal empty_vc_N, empty_vc_E, empty_vc_W, empty_vc_S, empty_vc_L: std_logic;
 
  	signal Xbar_sel_N, Xbar_sel_E, Xbar_sel_W, Xbar_sel_S, Xbar_sel_L: std_logic_vector(9 downto 0);
+
 begin
+
 ------------------------------------------------------------------------------------------------------------------------------
 ------------------------------------------------------------------------------------------------------------------------------
 -- all the FIFOs
@@ -111,64 +116,104 @@ FIFO_L: FIFO_credit_based
 ------------------------------------------------------------------------------------------------------------------------------
 
 -- all the LBDRs
-LBDR_N: LBDR generic map (cur_addr_rst => current_address, Rxy_rst => Rxy_rst, Cx_rst => Cx_rst, NoC_size => NoC_size)
+LBDR_N: LBDR generic map (Rxy_rst => Rxy_rst, Cx_rst => Cx_rst)
        PORT MAP (reset => reset, clk => clk, empty => empty_N,
-             flit_type => FIFO_D_out_N(DATA_WIDTH-1 downto DATA_WIDTH-3), dst_addr=> FIFO_D_out_N(NoC_size  downto 1) ,
+             flit_type => FIFO_D_out_N(DATA_WIDTH-1 downto DATA_WIDTH-3),
+						 cur_addr_y => std_logic_vector(to_unsigned(current_address / NoC_size_x,7)),
+						 cur_addr_x => std_logic_vector(to_unsigned(current_address mod NoC_size_x,7)),
+             dst_addr_y => FIFO_D_out_N(14 downto 8),
+             dst_addr_x => FIFO_D_out_N(7 downto 1),
              grant_N => '0', grant_E =>Grant_EN, grant_W => Grant_WN, grant_S=>Grant_SN, grant_L =>Grant_LN,
              Req_N=> Req_NN, Req_E=>Req_NE, Req_W=>Req_NW, Req_S=>Req_NS, Req_L=>Req_NL);
 
-LBDR_E: LBDR generic map (cur_addr_rst => current_address, Rxy_rst => Rxy_rst, Cx_rst => Cx_rst, NoC_size => NoC_size)
+LBDR_E: LBDR generic map (Rxy_rst => Rxy_rst, Cx_rst => Cx_rst)
    PORT MAP (reset =>  reset, clk => clk, empty => empty_E,
-             flit_type => FIFO_D_out_E(DATA_WIDTH-1 downto DATA_WIDTH-3), dst_addr=> FIFO_D_out_E(NoC_size downto 1) ,
+             flit_type => FIFO_D_out_E(DATA_WIDTH-1 downto DATA_WIDTH-3),
+						 cur_addr_y => std_logic_vector(to_unsigned(current_address / NoC_size_x,7)),
+						 cur_addr_x => std_logic_vector(to_unsigned(current_address mod NoC_size_x,7)),
+						 dst_addr_y => FIFO_D_out_E(14 downto 8),
+						 dst_addr_x => FIFO_D_out_E(7 downto 1),
              grant_N => Grant_NE, grant_E =>'0', grant_W => Grant_WE, grant_S=>Grant_SE, grant_L =>Grant_LE,
              Req_N=> Req_EN, Req_E=>Req_EE, Req_W=>Req_EW, Req_S=>Req_ES, Req_L=>Req_EL);
 
-LBDR_W: LBDR generic map (cur_addr_rst => current_address, Rxy_rst => Rxy_rst, Cx_rst => Cx_rst, NoC_size => NoC_size)
+LBDR_W: LBDR generic map (Rxy_rst => Rxy_rst, Cx_rst => Cx_rst)
    PORT MAP (reset =>  reset, clk => clk, empty => empty_W,
-             flit_type => FIFO_D_out_W(DATA_WIDTH-1 downto DATA_WIDTH-3), dst_addr=> FIFO_D_out_W(NoC_size downto 1) ,
+             flit_type => FIFO_D_out_W(DATA_WIDTH-1 downto DATA_WIDTH-3),
+						 cur_addr_y => std_logic_vector(to_unsigned(current_address / NoC_size_x,7)),
+						 cur_addr_x => std_logic_vector(to_unsigned(current_address mod NoC_size_x,7)),
+						 dst_addr_y => FIFO_D_out_W(14 downto 8),
+						 dst_addr_x => FIFO_D_out_W(7 downto 1),
              grant_N => Grant_NW, grant_E =>Grant_EW, grant_W =>'0' ,grant_S=>Grant_SW, grant_L =>Grant_LW,
              Req_N=> Req_WN, Req_E=>Req_WE, Req_W=>Req_WW, Req_S=>Req_WS, Req_L=>Req_WL);
 
-LBDR_S: LBDR generic map (cur_addr_rst => current_address, Rxy_rst => Rxy_rst, Cx_rst => Cx_rst, NoC_size => NoC_size)
+LBDR_S: LBDR generic map (Rxy_rst => Rxy_rst, Cx_rst => Cx_rst)
    PORT MAP (reset =>  reset, clk => clk, empty => empty_S,
-             flit_type => FIFO_D_out_S(DATA_WIDTH-1 downto DATA_WIDTH-3), dst_addr=> FIFO_D_out_S(NoC_size downto 1) ,
+             flit_type => FIFO_D_out_S(DATA_WIDTH-1 downto DATA_WIDTH-3),
+						 cur_addr_y => std_logic_vector(to_unsigned(current_address / NoC_size_x,7)),
+						 cur_addr_x => std_logic_vector(to_unsigned(current_address mod NoC_size_x,7)),
+						 dst_addr_y => FIFO_D_out_S(14 downto 8),
+						 dst_addr_x => FIFO_D_out_S(7 downto 1),
              grant_N => Grant_NS, grant_E =>Grant_ES, grant_W =>Grant_WS ,grant_S=>'0', grant_L =>Grant_LS,
              Req_N=> Req_SN, Req_E=>Req_SE, Req_W=>Req_SW, Req_S=>Req_SS, Req_L=>Req_SL);
 
-LBDR_L: LBDR generic map (cur_addr_rst => current_address, Rxy_rst => Rxy_rst, Cx_rst => Cx_rst, NoC_size => NoC_size)
+LBDR_L: LBDR generic map (Rxy_rst => Rxy_rst, Cx_rst => Cx_rst)
    PORT MAP (reset =>  reset, clk => clk, empty => empty_L,
-             flit_type => FIFO_D_out_L(DATA_WIDTH-1 downto DATA_WIDTH-3), dst_addr=> FIFO_D_out_L(NoC_size downto 1) ,
+             flit_type => FIFO_D_out_L(DATA_WIDTH-1 downto DATA_WIDTH-3),
+						 cur_addr_y => std_logic_vector(to_unsigned(current_address / NoC_size_x,7)),
+						 cur_addr_x => std_logic_vector(to_unsigned(current_address mod NoC_size_x,7)),
+						 dst_addr_y => FIFO_D_out_L(14 downto 8),
+						 dst_addr_x => FIFO_D_out_L(7 downto 1),
              grant_N => Grant_NL, grant_E =>Grant_EL, grant_W => Grant_WL,grant_S=>Grant_SL, grant_L =>'0',
              Req_N=> Req_LN, Req_E=>Req_LE, Req_W=>Req_LW, Req_S=>Req_LS, Req_L=>Req_LL);
 
 --VC LBDRs
-LBDR_vc_N: LBDR generic map (cur_addr_rst => current_address, Rxy_rst => Rxy_rst, Cx_rst => Cx_rst, NoC_size => NoC_size)
+LBDR_vc_N: LBDR generic map (Rxy_rst => Rxy_rst, Cx_rst => Cx_rst)
        PORT MAP (reset => reset, clk => clk, empty => empty_vc_N,
-             flit_type => FIFO_D_out_vc_N(DATA_WIDTH-1 downto DATA_WIDTH-3), dst_addr=> FIFO_D_out_vc_N(NoC_size  downto 1) ,
+             flit_type => FIFO_D_out_vc_N(DATA_WIDTH-1 downto DATA_WIDTH-3),
+						 cur_addr_y => std_logic_vector(to_unsigned(current_address / NoC_size_x,7)),
+						 cur_addr_x => std_logic_vector(to_unsigned(current_address mod NoC_size_x,7)),
+						 dst_addr_y => FIFO_D_out_vc_N(14 downto 8),
+						 dst_addr_x => FIFO_D_out_vc_N(7 downto 1),
              grant_N => '0', grant_E =>Grant_EN_vc, grant_W => Grant_WN_vc, grant_S=>Grant_SN_vc, grant_L =>Grant_LN_vc,
              Req_N=> Req_NN_vc, Req_E=>Req_NE_vc, Req_W=>Req_NW_vc, Req_S=>Req_NS_vc, Req_L=>Req_NL_vc);
 
-LBDR_vc_E: LBDR generic map (cur_addr_rst => current_address, Rxy_rst => Rxy_rst, Cx_rst => Cx_rst, NoC_size => NoC_size)
+LBDR_vc_E: LBDR generic map (Rxy_rst => Rxy_rst, Cx_rst => Cx_rst)
    PORT MAP (reset =>  reset, clk => clk, empty => empty_vc_E,
-             flit_type => FIFO_D_out_vc_E(DATA_WIDTH-1 downto DATA_WIDTH-3), dst_addr=> FIFO_D_out_vc_E(NoC_size downto 1) ,
+             flit_type => FIFO_D_out_vc_E(DATA_WIDTH-1 downto DATA_WIDTH-3),
+						 cur_addr_y => std_logic_vector(to_unsigned(current_address / NoC_size_x,7)),
+						 cur_addr_x => std_logic_vector(to_unsigned(current_address mod NoC_size_x,7)),
+						 dst_addr_y => FIFO_D_out_vc_E(14 downto 8),
+						 dst_addr_x => FIFO_D_out_vc_E(7 downto 1),
              grant_N => Grant_NE_vc, grant_E =>'0', grant_W => Grant_WE_vc, grant_S=>Grant_SE_vc, grant_L =>Grant_LE_vc,
              Req_N=> Req_EN_vc, Req_E=>Req_EE_vc, Req_W=>Req_EW_vc, Req_S=>Req_ES_vc, Req_L=>Req_EL_vc);
 
-LBDR_vc_W: LBDR generic map (cur_addr_rst => current_address, Rxy_rst => Rxy_rst, Cx_rst => Cx_rst, NoC_size => NoC_size)
+LBDR_vc_W: LBDR generic map (Rxy_rst => Rxy_rst, Cx_rst => Cx_rst)
    PORT MAP (reset =>  reset, clk => clk, empty => empty_vc_W,
-             flit_type => FIFO_D_out_vc_W(DATA_WIDTH-1 downto DATA_WIDTH-3), dst_addr=> FIFO_D_out_vc_W(NoC_size downto 1) ,
+             flit_type => FIFO_D_out_vc_W(DATA_WIDTH-1 downto DATA_WIDTH-3),
+						 cur_addr_y => std_logic_vector(to_unsigned(current_address / NoC_size_x,7)),
+						 cur_addr_x => std_logic_vector(to_unsigned(current_address mod NoC_size_x,7)),
+						 dst_addr_y => FIFO_D_out_vc_W(14 downto 8),
+						 dst_addr_x => FIFO_D_out_vc_W(7 downto 1),
              grant_N => Grant_NW_vc, grant_E =>Grant_EW_vc, grant_W =>'0' ,grant_S=>Grant_SW_vc, grant_L =>Grant_LW_vc,
              Req_N=> Req_WN_vc, Req_E=>Req_WE_vc, Req_W=>Req_WW_vc, Req_S=>Req_WS_vc, Req_L=>Req_WL_vc);
 
-LBDR_vc_S: LBDR generic map (cur_addr_rst => current_address, Rxy_rst => Rxy_rst, Cx_rst => Cx_rst, NoC_size => NoC_size)
+LBDR_vc_S: LBDR generic map (Rxy_rst => Rxy_rst, Cx_rst => Cx_rst)
    PORT MAP (reset =>  reset, clk => clk, empty => empty_vc_S,
-             flit_type => FIFO_D_out_vc_S(DATA_WIDTH-1 downto DATA_WIDTH-3), dst_addr=> FIFO_D_out_vc_S(NoC_size downto 1) ,
+             flit_type => FIFO_D_out_vc_S(DATA_WIDTH-1 downto DATA_WIDTH-3),
+						 cur_addr_y => std_logic_vector(to_unsigned(current_address / NoC_size_x,7)),
+						 cur_addr_x => std_logic_vector(to_unsigned(current_address mod NoC_size_x,7)),
+						 dst_addr_y => FIFO_D_out_vc_S(14 downto 8),
+						 dst_addr_x => FIFO_D_out_vc_S(7 downto 1),
              grant_N => Grant_NS_vc, grant_E =>Grant_ES_vc, grant_W =>Grant_WS_vc ,grant_S=>'0', grant_L =>Grant_LS_vc,
              Req_N=> Req_SN_vc, Req_E=>Req_SE_vc, Req_W=>Req_SW_vc, Req_S=>Req_SS_vc, Req_L=>Req_SL_vc);
 
-LBDR_vc_L: LBDR generic map (cur_addr_rst => current_address, Rxy_rst => Rxy_rst, Cx_rst => Cx_rst, NoC_size => NoC_size)
+LBDR_vc_L: LBDR generic map (Rxy_rst => Rxy_rst, Cx_rst => Cx_rst)
    PORT MAP (reset =>  reset, clk => clk, empty => empty_vc_L,
-             flit_type => FIFO_D_out_vc_L(DATA_WIDTH-1 downto DATA_WIDTH-3), dst_addr=> FIFO_D_out_vc_L(NoC_size downto 1) ,
+             flit_type => FIFO_D_out_vc_L(DATA_WIDTH-1 downto DATA_WIDTH-3),
+						 cur_addr_y => std_logic_vector(to_unsigned(current_address / NoC_size_x,7)),
+						 cur_addr_x => std_logic_vector(to_unsigned(current_address mod NoC_size_x,7)),
+						 dst_addr_y => FIFO_D_out_vc_L(14 downto 8),
+						 dst_addr_x => FIFO_D_out_vc_L(7 downto 1),
              grant_N => Grant_NL_vc, grant_E =>Grant_EL_vc, grant_W => Grant_WL_vc,grant_S=>Grant_SL_vc, grant_L =>'0',
              Req_N=> Req_LN_vc, Req_E=>Req_LE_vc, Req_W=>Req_LW_vc, Req_S=>Req_LS_vc, Req_L=>Req_LL_vc);
 ------------------------------------------------------------------------------------------------------------------------------

@@ -9,7 +9,7 @@ def print_help(argv, program_argv):
     print
     print BOLD + OKBLUE + "  Network parameters:" + ENDC
     print
-    print BOLD + "  -D [size] [size]:" + ENDC
+    print BOLD + "  -D [x-size] [y-size]:" + ENDC
     print "\tMake a network of [size]X[size]. " \
         + "Default value is " + str(program_argv['network_dime_x']) + " " + str(program_argv['network_dime_y']) + "."
     print
@@ -64,7 +64,7 @@ def print_help(argv, program_argv):
     print "\t\t         the injection of packets would stop at 10000 ns and simulation will stop "
     print "\t\t         at 12000 ns. at the end of simulation the tool reports the latency results!"
     print BOLD + "  Example 3:" + ENDC
-    print "\t\tcommand: python simulate.py -D 4 -vc -Rand 0.05 -PS 8 8 -sim 10000 -end 12000 "
+    print "\t\tcommand: python simulate.py -D 4 4 -vc -Rand 0.05 -PS 8 8 -sim 10000 -end 12000"
     print "\t\tdetails: runs a 4x4 network with virtual channels packet injection rate of 0.01 and "
     print "\t\t         packet size of 8. the injection of packets would stop at 10000 ns and "
     print "\t\t         simulation will stop at 12000 ns."
