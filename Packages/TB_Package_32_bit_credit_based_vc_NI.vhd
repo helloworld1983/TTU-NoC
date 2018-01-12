@@ -1,12 +1,13 @@
 --Copyright (C) 2016 Siavoosh Payandeh Azad
 
+
 library ieee;
 use ieee.std_logic_1164.all;
 use ieee.std_logic_unsigned.all;
 use IEEE.NUMERIC_STD.all;
- use ieee.math_real.all;
- use std.textio.all;
- use ieee.std_logic_misc.all;
+use ieee.math_real.all;
+use std.textio.all;
+use ieee.std_logic_misc.all;
 
 package TB_Package is
   function CX_GEN(current_address, network_x, network_y : integer) return integer;
@@ -15,8 +16,8 @@ package TB_Package is
                       finish_time: in time;
                       signal clk:                      in std_logic;
                       -- NI configuration
-                      signal reserved_address :        in std_logic_vector(29 downto 0);
-                      signal reserved_address_vc :     in std_logic_vector(29 downto 0);
+                      signal reserved_address :        in std_logic_vector(29 downto 0);  -- reserved address for sending data to VC 0
+                      signal reserved_address_vc :     in std_logic_vector(29 downto 0);  -- reserved address for sending data to VC 1
                       signal flag_address :            in std_logic_vector(29 downto 0) ; -- reserved address for the memory mapped I/O
                       signal counter_address :         in std_logic_vector(29 downto 0);
                       signal reconfiguration_address : in std_logic_vector(29 downto 0);  -- reserved address for reconfiguration register
@@ -139,15 +140,9 @@ package body TB_Package is
       --       .-------------------------------------------------.
       --       | N2P_empty | P2N_full |                       ...|
       --       '-------------------------------------------------'
-      if  data_read(29) = '0' then  -- N2P is not empty, can receive flit
-          -- read the received data status
-          --address <= counter_address;
-          --write_byte_enable <= "0000";
-          --wait until clk'event and clk ='0';
-
-          -- read the received data status
-
-
+      -- Note that VC 1 has higher priority to VC 0
+      if  data_read(29) = '0' then  -- N2P VC1 is not empty, can receive flit
+          -- set the address for VC1
           address <= reserved_address_vc;
           read_vc := 1;
 
@@ -175,14 +170,8 @@ package body TB_Package is
               writeline(RECEIVED_FILE, RECEIVED_LINEVARIABLE);
           end if;
 
-      elsif data_read(31) = '0' then  -- N2P is not empty, can receive flit
-          -- read the received data status
-          --address <= counter_address;
-          --write_byte_enable <= "0000";
-          --wait until clk'event and clk ='0';
-
-          -- read the received data status
-
+      elsif data_read(31) = '0' then  -- N2P VC0 is not empty, can receive flit
+          -- set the address for VC0
           address <= reserved_address;
           read_vc := 0;
 
@@ -233,6 +222,7 @@ package body TB_Package is
                     if vc = 1 then
                       address <= reserved_address_vc;
                       write_byte_enable <= "1111";
+                      -- if you want to write into VC1 you should write "00000000000001" into the sender part! (since the NI sets the source address automatically, the source address field can be used for selecting VC)
                       data_write <= "0000" &  "00000000000001" & std_logic_vector(to_unsigned(send_destination_node/network_x, 7)) & std_logic_vector(to_unsigned(send_destination_node mod network_x, 7));
                     else
                       address <= reserved_address;
@@ -244,7 +234,7 @@ package body TB_Package is
                   else
                     state :=  Idle;
                   end if;
-                  -- first body flit
+
               elsif state = Header_flit then
 
                   --generating the packet length
@@ -262,6 +252,7 @@ package body TB_Package is
                     address <= reserved_address;
                   end if;
                   write_byte_enable <= "1111";
+                  -- first body flit
                   if first_packet = True then
                     data_write <= "0000" &  std_logic_vector(to_unsigned(send_packet_length, 14)) & std_logic_vector(to_unsigned(send_id_counter, 14));
                   else
@@ -302,6 +293,7 @@ package body TB_Package is
                   end if;
                   send_counter := 0;
                   state :=  Idle;
+                  -- updating the id counter!
                   send_id_counter := send_id_counter + 1;
                   if send_id_counter = 16384 then
                     send_id_counter := 0;
