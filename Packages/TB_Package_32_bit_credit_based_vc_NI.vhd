@@ -161,7 +161,7 @@ package body TB_Package is
           end if;
 
           if  (data_read(DATA_WIDTH-1 downto DATA_WIDTH-3) = "010") then  -- got body flit
-              if receive_counter = 1 then
+              if receive_counter_vc = 1 then
                   receive_packet_length_vc := to_integer(unsigned(data_read(28 downto 15)));
                   receive_packet_id_vc := to_integer(unsigned(data_read(14 downto 1)));
               end if;
