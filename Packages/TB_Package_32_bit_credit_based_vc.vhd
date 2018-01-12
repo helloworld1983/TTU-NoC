@@ -194,7 +194,7 @@ package body TB_Package is
 
       writeline(VEC_FILE, LINEVARIABLE);
       wait until clk'event and clk ='0'; -- On negative edge of clk (for syncing purposes)
-      port_in <= Header_gen(network_size_x,source, destination_id); -- Generating the header flit of the packet (All packets have a header flit)!
+      port_in <= Header_gen(network_size_x, source, destination_id); -- Generating the header flit of the packet (All packets have a header flit)!
 
       if vc = 0 then
         valid_out <= '1';

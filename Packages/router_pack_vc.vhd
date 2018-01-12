@@ -135,35 +135,41 @@ end COMPONENT;
     );
   end COMPONENT;
 
-  component NI is
-   generic(current_address : integer := 10;   -- the current node's address
-           NI_depth : integer := 32;
-           NI_couter_size: integer:= 5; -- should be set to log2 of NI_depth
-           reserved_address : std_logic_vector(29 downto 0) := "000000000000000001111111111111"; -- NI's memory mapped reserved
-           flag_address : std_logic_vector(29 downto 0) :=     "000000000000000010000000000000";  -- reserved address for the flag register
-           counter_address : std_logic_vector(29 downto 0) :=     "000000000000000010000000000001");  -- packet counter register address!
-   port(clk               : in std_logic;
-        reset             : in std_logic;
-        enable            : in std_logic;
-        write_byte_enable : in std_logic_vector(3 downto 0);
-        address           : in std_logic_vector(31 downto 2);
-        data_write        : in std_logic_vector(31 downto 0);
-        data_read         : out std_logic_vector(31 downto 0);
+  COMPONENT NI_vc is
+     generic(current_x : integer := 10; 	-- the current node's x
+             current_y : integer := 10; 	-- the current node's y
+             NI_depth : integer := 32;
+             NI_couter_size: integer:= 5; -- should be set to log2 of NI_depth
+             reserved_address : std_logic_vector(29 downto 0)    := "000000000000000001111111111110"; -- NI's memory mapped reserved VC_0
+             reserved_address_vc : std_logic_vector(29 downto 0) := "000000000000000001111111111111"; -- NI's memory mapped reserved for VC_1
+             flag_address : std_logic_vector(29 downto 0)        := "000000000000000010000000000000";  -- reserved address for the flag register
+             counter_address : std_logic_vector(29 downto 0)     := "000000000000000010000000000001");  -- packet counter register address!
+     port(clk               : in std_logic;
+          reset             : in std_logic;
+          enable            : in std_logic;
+          write_byte_enable : in std_logic_vector(3 downto 0);
+          address           : in std_logic_vector(31 downto 2);
+          data_write        : in std_logic_vector(31 downto 0);
+          data_read         : out std_logic_vector(31 downto 0);
 
-        -- interrupt signal: disabled!
-        irq_out           : out std_logic;
+          -- interrupt signal: disabled!
+          irq_out           : out std_logic;
 
-        -- signals for sending packets to network
-        credit_in : in std_logic;
-        valid_out: out std_logic;
-        TX: out std_logic_vector(31 downto 0);  -- data sent to the NoC
+          -- signals for sending packets to network
+          credit_in : in std_logic;
+          valid_out: out std_logic;
+          credit_in_vc: in std_logic;
+          valid_out_vc: out std_logic;
+          TX: out std_logic_vector(31 downto 0);	-- data sent to the NoC
 
-        -- signals for reciving packets from the network
-        credit_out : out std_logic;
-        valid_in: in std_logic;
-        RX: in std_logic_vector(31 downto 0)  -- data recieved form the NoC
+          -- signals for reciving packets from the network
+          credit_out : out std_logic;
+          valid_in: in std_logic;
+          credit_out_vc: out std_logic;
+          valid_in_vc: in std_logic;
+          RX: in std_logic_vector(31 downto 0)	-- data recieved form the NoC
 
-  );
-end component; --entity NI
+  	);
+  end COMPONENT; --entity NI_vc
 
 end; --package body

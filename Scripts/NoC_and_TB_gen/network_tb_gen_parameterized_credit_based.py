@@ -169,8 +169,11 @@ for i in range(0, network_dime_x*network_dime_y):
         noc_file.write("\tsignal credit_out_vc_L_"+str(i)+", credit_in_vc_L_"+str(i)+", valid_in_vc_L_"+str(i)+", valid_out_vc_L_"+str(i) + ": std_logic;\n")
 
 if add_NI:
-
-  noc_file.write("\tsignal reserved_address :        std_logic_vector(29 downto 0):= \"000000000000000001111111111111\";\n")
+  if vc:
+      noc_file.write("\tsignal reserved_address :        std_logic_vector(29 downto 0):= \"000000000000000001111111111110\";\n")
+      noc_file.write("\tsignal reserved_address_vc :     std_logic_vector(29 downto 0):= \"000000000000000001111111111111\";\n")
+  else:
+      noc_file.write("\tsignal reserved_address :        std_logic_vector(29 downto 0):= \"000000000000000001111111111111\";\n")
   noc_file.write("\tsignal flag_address :            std_logic_vector(29 downto 0):= \"000000000000000010000000000000\" ; -- reserved address for the memory mapped I/O\n")
   noc_file.write("\tsignal counter_address :         std_logic_vector(29 downto 0):= \"000000000000000010000000000001\";\n")
   noc_file.write("\tsignal reconfiguration_address : std_logic_vector(29 downto 0):= \"000000000000000010000000000010\";  -- reserved address for reconfiguration register\n")
@@ -266,8 +269,11 @@ if add_NI:
     noc_file.write("-- connecting the NIs\n")
 
     for node_number in range(0, network_dime_x*network_dime_y):
-      noc_file.write("NI_" + str(node_number) + ": NI \n")
-      noc_file.write("   generic map(current_address => " + str(node_number) + ",\n")
+      if vc:
+          noc_file.write("NI_" + str(node_number) + ": NI_vc \n")
+      else:
+        noc_file.write("NI_" + str(node_number) + ": NI \n")
+      noc_file.write("   generic map(current_x => " + str(node_number%network_dime_x) + ", current_y => " + str(node_number/network_dime_x) + ",\n")
       noc_file.write("               NI_depth => " + str(NI_depth) + ",\n")
       noc_file.write("               NI_couter_size => " + str(int(ceil(log(NI_depth)/log(2)))) + "\n")
       noc_file.write("           ) \n")
@@ -279,12 +285,19 @@ if add_NI:
       noc_file.write("        -- interrupt signal: generated evertime a packet is recieved!\n")
       noc_file.write("        irq_out => irq_out_" + str(node_number) + ", \n")
       noc_file.write("        -- signals for sending packets to network\n")
+
       noc_file.write("        credit_in => credit_out_L_" + str(node_number) + ", \n")
       noc_file.write("        valid_out => valid_in_L_" + str(node_number) + ",\n")
+      if vc:
+          noc_file.write("        credit_in_vc => credit_out_vc_L_" + str(node_number) + ", \n")
+          noc_file.write("        valid_out_vc => valid_in_vc_L_" + str(node_number) + ",\n")
       noc_file.write("        TX => RX_L_" + str(node_number) + ", -- data sent to the NoC\n")
       noc_file.write("        -- signals for reciving packets from the network\n")
       noc_file.write("        credit_out => credit_in_L_" + str(node_number) + ", \n")
       noc_file.write("        valid_in => valid_out_L_" + str(node_number) + ",\n")
+      if vc:
+          noc_file.write("        credit_out_vc => credit_in_vc_L_" + str(node_number) + ", \n")
+          noc_file.write("        valid_in_vc => valid_out_vc_L_" + str(node_number) + ",\n")
       noc_file.write("        RX => TX_L_" + str(node_number) + "\n")
       noc_file.write("  );\n")
 
@@ -300,7 +313,10 @@ if add_NI:
       # NI_control needs fixing !!!
       noc_file.write("NI_control("+str(network_dime_x)+","+str(network_dime_y)+", "+str(frame_size)+", "+str(node_number)+", "+str(random_start)+", " +str(packet_size_min)+", " +str(packet_size_max)+", "+str(random_end)+" ns, clk,\n")
       noc_file.write("           -- NI configuration\n")
-      noc_file.write("           reserved_address, flag_address, counter_address, reconfiguration_address,\n")
+      if vc:
+          noc_file.write("           reserved_address, reserved_address_vc, flag_address, counter_address, reconfiguration_address,\n")
+      else:
+          noc_file.write("           reserved_address, flag_address, counter_address, reconfiguration_address,\n")
       noc_file.write("           -- NI signals\n")
       noc_file.write("           enable_" + str(node_number) + ", write_byte_enable_" + str(node_number) + ", address_" + str(node_number) + ", data_write_" + str(node_number) + ", data_read_" + str(node_number) + ", test_"+str(node_number)+"); \n")
       noc_file.write("\n")
@@ -348,7 +364,6 @@ else:
         # Package file for VC needs to be fixed !!!
         if vc:
             noc_file.write("get_packet("+str(network_dime_x)+", "+str(data_width)+", 5, "+str(i)+", clk, credit_in_L_"+str(i)+", valid_out_L_"+str(i)+", credit_in_vc_L_"+str(i)+", valid_out_vc_L_"+str(i)+", TX_L_"+str(i)+");\n")
-
         else:
             noc_file.write("get_packet("+str(network_dime_x)+", "+str(data_width)+", 5, "+str(i)+", clk, credit_in_L_"+str(i)+", valid_out_L_"+str(i)+",  TX_L_"+str(i)+");\n")
 

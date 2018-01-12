@@ -97,7 +97,8 @@ end COMPONENT;
   end COMPONENT;
 
   component NI is
-   generic(current_address : integer := 10;   -- the current node's address
+   generic(current_x : integer := 10; 	-- the current node's x
+           current_y : integer := 10; 	-- the current node's y
            NI_depth : integer := 32;
            NI_couter_size: integer:= 5; -- should be set to log2 of NI_depth
            reserved_address : std_logic_vector(29 downto 0) := "000000000000000001111111111111"; -- NI's memory mapped reserved

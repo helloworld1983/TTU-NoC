@@ -21,7 +21,8 @@ use ieee.std_logic_misc.all;
 
 
 entity NI is
-   generic(current_address : integer := 10; 	-- the current node's address
+   generic(current_x : integer := 10; 	-- the current node's x
+           current_y : integer := 10; 	-- the current node's y
            NI_depth : integer := 32;
            NI_couter_size: integer:= 5; -- should be set to log2 of NI_depth
            reserved_address : std_logic_vector(29 downto 0) := "000000000000000001111111111111"; -- NI's memory mapped reserved
@@ -267,7 +268,7 @@ process(P2N_empty, state, credit_counter_out, packet_length_counter_out, packet_
             when HEADER_FLIT =>
                 if credit_counter_out /= "00" and P2N_empty = '0' then
                     grant <= '1';
-                    TX <= "001" & std_logic_vector(to_unsigned(current_address, 14)) & FIFO_Data_out(13 downto 0) & XOR_REDUCE("001" & std_logic_vector(to_unsigned(current_address, 14)) & FIFO_Data_out(13 downto 0));
+                    TX <= "001" & std_logic_vector(to_unsigned(current_y, 7)) & std_logic_vector(to_unsigned(current_x, 7)) & FIFO_Data_out(13 downto 0) & XOR_REDUCE("001" & std_logic_vector(to_unsigned(current_y, 7)) & std_logic_vector(to_unsigned(current_x, 7)) & FIFO_Data_out(13 downto 0));
                     state_in <= BODY_FLIT_1;
                 else
                     state_in <= HEADER_FLIT;
